@@ -19,6 +19,9 @@ Method Prompt()
 
     Read "KanaName : ", empKanaName, !
     Set ..KanaName = empKanaName
+
+    Read "Address : ", empAddress, !
+    Set ..Address = empAddress
 }
 
 }
