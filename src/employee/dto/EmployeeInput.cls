@@ -1,7 +1,7 @@
 Class employee.dto.EmployeeInput Extends %RegisteredObject
 {
 
-Property EmployeeNumber As %String;
+Property EmployeeNumber As %Integer(MAXVAL = 999, MINVAL = 0) [ Required ];
 
 Property KanjiName As %String;
 
@@ -11,16 +11,18 @@ Property Address As %String;
 
 Method Prompt()
 {
-    Read "Employee Number : ", empNumber, !
+    Write #
+    Write !!, "＊＊＊社員登録PG＊＊＊", !!
+    Read "1", ?4,"社員番号 ＝ ", empNumber, !
     Set ..EmployeeNumber = empNumber
 
-    Read "KanjiName : ", empKanjiName, !
+    Read "2", ?4, "氏名漢字 ＝ ", empKanjiName, !
     Set ..KanjiName = empKanjiName
 
-    Read "KanaName : ", empKanaName, !
+    Read "3" , ?4,"氏名カナ ＝ ", empKanaName, !
     Set ..KanaName = empKanaName
 
-    Read "Address : ", empAddress, !
+    Read "4", ?4,"住　　所 ＝ ", empAddress, !
     Set ..Address = empAddress
 }
 
