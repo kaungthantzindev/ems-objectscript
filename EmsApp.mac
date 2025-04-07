@@ -1,0 +1,7 @@
+ROUTINE EmsApp
+EmsApp ;
+
+Start
+    Do ##class(MainApp.App).Run()
+
+    Quit

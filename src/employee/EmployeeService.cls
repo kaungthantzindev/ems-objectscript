@@ -18,7 +18,7 @@ Method Create(input As employee.dto.EmployeeInput)
 
     If ..validator.Validate(input) {
         Do ..employeeRepository.Save(input)
-        Write !, "✅ Employee registered succefully!", !
+        Write !, "✅ Employee registered successfully!", !
     } Else {
         Write !, "❌ Failed to save employee!", !
     }
