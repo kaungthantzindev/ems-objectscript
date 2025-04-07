@@ -5,23 +5,6 @@ Property employeeRepository As employee.EmployeeRepository [ InitialExpression =
 
 Property validator As utils.Validator [ InitialExpression = {##class(utils.Validator).%New()}, Private ];
 
-Method Process(input As employee.dto.EmployeeInput)
-{
-        If ..employeeRepository.Exist(input.EmployeeNumber) {
-            Write "=======================", !
-            Write "Employee Already Exist!", !
-            Write "=======================", !
-            Do ..employeeRepository.ShowData(input.EmployeeNumber)
-            Quit
-        } 
-
-        If ..validator.Validate(input) {
-            Do ..employeeRepository.Save(input)
-        } Else {
-            Write "Validation Failed", !
-        }
-}
-
 Method Create(input As employee.dto.EmployeeInput)
 {
     If ..employeeRepository.Exist(input.EmployeeNumber) {
