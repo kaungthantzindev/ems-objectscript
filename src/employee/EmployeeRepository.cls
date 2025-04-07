@@ -25,15 +25,6 @@ Method FindOne(id As %Integer) As employee.dto.EmployeeInput
     Return employee
 }
 
-Method ShowData(id As %Integer)
-{
-    Set employee = ..FindOne(id)
-    Write !, "Employee Number = ", employee.EmployeeNumber , !
-    Write "KanjiName = ", employee.KanjiName, !
-    Write "KanaName = ", employee.KanaName, !
-    Write "Address = ", employee.Address, !
-}
-
 Method Save(input As employee.dto.EmployeeInput)
 {
        Set ^Employee(input.EmployeeNumber, "empNumber") = input.EmployeeNumber
