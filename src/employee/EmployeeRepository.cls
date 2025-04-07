@@ -1,7 +1,7 @@
 Class employee.EmployeeRepository Extends %RegisteredObject
 {
 
-Method Exist(id As %String) As %Boolean
+Method Exist(id As %Integer) As %Boolean
 {
     If $DATA(^Employee(id)) {
         Quit 1
@@ -10,7 +10,7 @@ Method Exist(id As %String) As %Boolean
     }
 }
 
-Method FindOne(id As %String) As employee.dto.EmployeeInput
+Method FindOne(id As %Integer) As employee.dto.EmployeeInput
 {
     If '$DATA(^Employee(id)) {
         Return ""
@@ -25,10 +25,10 @@ Method FindOne(id As %String) As employee.dto.EmployeeInput
     Return employee
 }
 
-Method ShowData(id As %String)
+Method ShowData(id As %Integer)
 {
     Set employee = ..FindOne(id)
-    Write "Employee Number = ", employee.EmployeeNumber , !
+    Write !, "Employee Number = ", employee.EmployeeNumber , !
     Write "KanjiName = ", employee.KanjiName, !
     Write "KanaName = ", employee.KanaName, !
     Write "Address = ", employee.Address, !
@@ -42,7 +42,7 @@ Method Save(input As employee.dto.EmployeeInput)
        Set ^Employee(input.EmployeeNumber, "empAddress") = input.Address
 }
 
-Method Delete(id As %String)
+Method Delete(id As %Integer)
 {
     Kill ^Employee(id)
 }
