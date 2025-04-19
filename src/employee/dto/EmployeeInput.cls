@@ -1,7 +1,7 @@
 Class employee.dto.EmployeeInput Extends %RegisteredObject
 {
 
-Property EmployeeNumber As %Integer(MAXVAL = 999, MINVAL = 0) [ Required ];
+Property EmployeeNumber As %Integer;
 
 Property KanjiName As %String;
 
@@ -19,21 +19,46 @@ Method GetFieldList() As %ListOfDataTypes
 
 Method InputField(fieldName As %String)
 {
-    If fieldName = "EmployeeNumber" {
-        Read "1", ?4, "社員番号 ＝ ", value, !
-        Set ..EmployeeNumber = value
-    }
-    ElseIf fieldName = "KanjiName" {
-        Read "2", ?4, "氏名漢字 ＝ ", value, !
-        Set ..KanjiName = value
-    }
-    ElseIf fieldName = "KanaName" {
-        Read "3", ?4, "氏名カナ ＝ ", value, !
-        Set ..KanaName = value
-    }
-    ElseIf fieldName = "Address" {
-        Read "4", ?4, "住　　所 ＝ ", value, !
-        Set ..Address = value
+    While (1) {
+        If fieldName = "EmployeeNumber" {
+            Read "1", ?4, "社員番号 ＝ ", value, !
+            If ('##class(utils.Validator).IsValidEmpNumber(value)){
+                Write "❌ Invalid Employee Number!", !
+            } Else {
+                Set ..EmployeeNumber = value
+                Quit
+            }
+        }
+
+        ElseIf fieldName = "KanjiName" {
+            Read "2", ?4, "氏名漢字 ＝ ", value, !
+            If ('##class(utils.Validator).IsZenkaku(value)) {
+                Write "❌ Kanji Name must be Zenkaku characters!", !
+            } Else {
+                Set ..KanjiName = value
+                Quit
+            }
+        }
+
+        ElseIf fieldName = "KanaName" {
+            Read "3", ?4, "氏名カナ ＝ ", value, !
+            If ('##class(utils.Validator).IsHankaku(value)) {
+                Write "❌ Kana Name must be Hankaku characters!", !
+            } Else {
+                Set ..KanaName = value
+                Quit
+            }
+        }
+
+        ElseIf fieldName = "Address" {
+            Read "4", ?4, "住　　所 ＝ ", value, !
+            If ('##class(utils.Validator).IsZenkaku(value)) {
+                Write "❌ Address must be Zenkaku characters!", !
+            } Else {
+                Set ..Address = value
+                Quit
+            }
+        }
     }
 }
 
