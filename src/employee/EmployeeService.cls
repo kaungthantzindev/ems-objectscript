@@ -27,7 +27,7 @@ Method Create(input As employee.dto.EmployeeInput)
 Method Delete(id As %Integer)
 {
     If '..employeeRepository.Exist(id) {
-        Write "❌ Employee Not Found!"
+        Write "❌ Unregistered data",!
         Quit
     }
 
@@ -38,7 +38,7 @@ Method Delete(id As %Integer)
 Method ShowData(id As %Integer)
 {
     If '..employeeRepository.Exist(id) {
-        Write "❌ Employee Not Found!"
+        Write "❌ Unregistered data"
         Quit
     }
 

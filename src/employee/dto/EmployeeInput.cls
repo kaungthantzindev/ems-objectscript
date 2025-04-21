@@ -21,7 +21,7 @@ Method InputField(fieldName As %String)
 {
     While (1) {
         If fieldName = "EmployeeNumber" {
-            Read "1", ?4, "社員番号 ＝ ", value, !
+            Read "1", ?4, "Employee Number : ", value, !
             If ('##class(utils.Validator).IsValidEmpNumber(value)){
                 Write "❌ Invalid Employee Number!", !
             } Else {
@@ -31,7 +31,7 @@ Method InputField(fieldName As %String)
         }
 
         ElseIf fieldName = "KanjiName" {
-            Read "2", ?4, "氏名漢字 ＝ ", value, !
+            Read "2", ?4, "KanjiName : ", value, !
             If ('##class(utils.Validator).IsZenkaku(value)) {
                 Write "❌ Kanji Name must be Zenkaku characters!", !
             } Else {
@@ -41,7 +41,7 @@ Method InputField(fieldName As %String)
         }
 
         ElseIf fieldName = "KanaName" {
-            Read "3", ?4, "氏名カナ ＝ ", value, !
+            Read "3", ?4, "KanaName : ", value, !
             If ('##class(utils.Validator).IsHankaku(value)) {
                 Write "❌ Kana Name must be Hankaku characters!", !
             } Else {
@@ -51,7 +51,7 @@ Method InputField(fieldName As %String)
         }
 
         ElseIf fieldName = "Address" {
-            Read "4", ?4, "住　　所 ＝ ", value, !
+            Read "4", ?4, "Address : ", value, !
             If ('##class(utils.Validator).IsZenkaku(value)) {
                 Write "❌ Address must be Zenkaku characters!", !
             } Else {
@@ -64,10 +64,6 @@ Method InputField(fieldName As %String)
 
 Method Prompt()
 {
-    Write #
-    Write "=========================="
-    Write !!, "＊＊＊社員登録PG＊＊＊", !!!
-
     Set fields = ..GetFieldList()
     For i=1:1:$LISTLENGTH(fields) {
         Set fieldName = $LISTGET(fields, i)
