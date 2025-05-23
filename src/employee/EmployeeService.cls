@@ -7,14 +7,14 @@ Property validator As utils.Validator [ InitialExpression = {##class(utils.Valid
 
 Method Create(input As employee.dto.EmployeeInput)
 {
-    If ..employeeRepository.Exist(input.EmployeeNumber) {
-        Write ! ,"=======================", !
-        Write "Employee Already Exist!", !
-        Write "=======================", !
-        Do ..ShowData(input.EmployeeNumber)
-        Write !, "❌ Failed to save employee!", !
-        Quit
-    }
+    #; If ..employeeRepository.Exist(input.EmployeeNumber) {
+    #;     Write ! ,"=======================", !
+    #;     Write "Employee Already Exist!", !
+    #;     Write "=======================", !
+    #;     Do ..ShowData(input.EmployeeNumber)
+    #;     Write !, "❌ Failed to save employee!", !
+    #;     Quit
+    #; }
 
     If ..validator.Validate(input) {
         Do ..employeeRepository.Save(input)
