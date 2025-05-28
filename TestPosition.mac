@@ -1,0 +1,30 @@
+ROUTINE TestPosition
+TestPosition ;
+    Write "hello this is testing X and Y position", !
+    Write "X is : ", $X, !
+    Write "Y is : ", $Y
+    Read "Moving X and Y : ", row, !
+    Write $CHAR(27)_"["_$Y_"H"
+    Quit
+
+Test;
+    Write "Test pattern match", !
+    Read "Enter something : ", var, !
+    Write var?1ZHWKATAZN
+    Write var
+    Quit
+    #; WRITE "...a numeric character? "
+    #; WRITE var?1N,!
+
+    #; WRITE "...an alphabetic or ",!,"  a numeric character? "
+    #; WRITE var?1A,!
+
+#; W $C(27)"["_2";"3"H"
+
+#; POSITION
+
+#; W $C(27)"["_2";"3"H"　　　Y=2 X=3
+
+#; Clear
+
+#; W $C(27)_"[0J"
