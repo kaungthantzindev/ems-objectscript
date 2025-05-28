@@ -58,10 +58,6 @@ Prompt
         Set ^EmsInput("KanjiName") = ^Employee(empId, "empKanjiName")
         Set ^EmsInput("KanaName") = ^Employee(empId, "empKanaName")
         Set ^EmsInput("Address") = ^Employee(empId, "empAddress")
-
-        Write !,"✅ Employee Found!",!
-        Write ?4, "1. 社員番号 ＝ ", ^EmsInput("EmployeeNumber"), !
-        Set ^EmsCursorPosition("EmployeeNumber") = $Y
         Write ?4, "2. 氏名漢字 ＝ ", ^EmsInput("KanjiName"), !
         Set ^EmsCursorPosition("KanjiName") = $Y
         Write ?4, "3. 氏名カナ ＝ ", ^EmsInput("KanaName"), !
@@ -71,6 +67,9 @@ Prompt
         Quit
     }
 
+    Do InputField("KanjiName")
+    Do InputField("KanaName")
+    Do InputField("Address")
     Quit
 
 InputField(fieldName)
@@ -145,7 +144,7 @@ Create
     Set ^Employee(id, "empKanaName") = ^EmsInput("KanaName")
     Set ^Employee(id, "empAddress") = ^EmsInput("Address")
 
-    Write !, "✅ Employee registered successfully!", !
+    Do ShowSuccessMessage("Success")
     Quit
 
 Delete(id)
@@ -155,7 +154,7 @@ Delete(id)
     }
 
     Kill ^Employee(id)
-    Write !,"✅ Employee ", id, " Successfully deleted!", !
+    Do ShowSuccessMessage("Success")
     Quit
 
 
@@ -196,3 +195,13 @@ IsHankaku(value)
         Quit 1
     }
     Quit 0
+
+ShowSuccessMessage(msg)
+    Write #
+    Write "###################################", !
+    Write ?10 , msg, !
+    Write "###################################"
+    Hang 1
+    Write #
+    GOTO Main
+    Quit
