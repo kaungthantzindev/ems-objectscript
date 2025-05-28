@@ -4,39 +4,41 @@ Main
     Write "=========================="
     Write !!, "＊＊＊社員登録PG＊＊＊", !!!
     Do Start
+
+    Kill ^EmsInput, ^EmsCursorPosition
     Quit
 
 Start
-    New input, state, fields, currentPosition, position
+    New state, fields, currentPosition
     Set state = 1
 
     While state {
-        Do Prompt(.input, .position)
+        Do Prompt
 
         Set fields = $LISTBUILD("KanjiName", "KanaName", "Address")
         Set currentPosition = $LISTLENGTH(fields) + 1
 
         While 1 {
-            Do AskOperationKey(.input, .position)
+            Do AskOperationKey
 
-            If input("OperationKey") = "@" {
-                Do Create(.input)
+            If ^EmsInput("OperationKey") = "@" {
+                Do Create
                 Quit
             }
-            ElseIf input("OperationKey") = "DEL" {
-                Do Delete(input("EmployeeNumber"))
+            ElseIf ^EmsInput("OperationKey") = "DEL" {
+                Do Delete(^EmsInput("EmployeeNumber"))
                 Quit
             }
-            ElseIf input("OperationKey") = "$" {
+            ElseIf ^EmsInput("OperationKey") = "$" {
                 Set state = 0
                 Write !!, "👋 Bye!", !
                 Quit
             }
-            ElseIf input("OperationKey") = "/" {
-                Do HandleMoveUp(fields, .currentPosition, .input, .position)
+            ElseIf ^EmsInput("OperationKey") = "/" {
+                Do HandleMoveUp(fields, .currentPosition)
             }
-            ElseIf input("OperationKey") = "//" {
-                Do HandleMoveToStart(fields, .currentPosition, .input, .position)
+            ElseIf ^EmsInput("OperationKey") = "//" {
+                Do HandleMoveToStart(fields, .currentPosition)
             }
             Else {
                 Write "⚠️ Unknown operation key!", !
@@ -45,39 +47,33 @@ Start
     }
     Quit
 
-Prompt(input, position)
+Prompt
     New empId, existing
-    Do InputField("EmployeeNumber", .input)
+    Do InputField("EmployeeNumber")
 
-    Set empId = input("EmployeeNumber")
+    Set empId = ^EmsInput("EmployeeNumber")
     Set existing = $Data(^Employee(empId))
 
     If existing {
-        Set input("KanjiName") = ^Employee(empId, "empKanjiName")
-        Set input("KanaName") = ^Employee(empId, "empKanaName")
-        Set input("Address") = ^Employee(empId, "empAddress")
+        Set ^EmsInput("KanjiName") = ^Employee(empId, "empKanjiName")
+        Set ^EmsInput("KanaName") = ^Employee(empId, "empKanaName")
+        Set ^EmsInput("Address") = ^Employee(empId, "empAddress")
 
         Write !,"✅ Employee Found!",!
-        Write ?4, "1. 社員番号 ＝ ", input("EmployeeNumber"), !
-        Set position("EmployeeNumber") = $Y
-        Write ?4, "2. 氏名漢字 ＝ ", input("KanjiName"), !
-        Set position("KanjiName") = $Y
-        Write ?4, "3. 氏名カナ ＝ ", input("KanaName"), !
-        Set position("KanaName") = $Y
-        Write ?4, "4. 住　　所 ＝ ", input("Address"), !
-        Set position("Address") = $Y
+        Write ?4, "1. 社員番号 ＝ ", ^EmsInput("EmployeeNumber"), !
+        Set ^EmsCursorPosition("EmployeeNumber") = $Y
+        Write ?4, "2. 氏名漢字 ＝ ", ^EmsInput("KanjiName"), !
+        Set ^EmsCursorPosition("KanjiName") = $Y
+        Write ?4, "3. 氏名カナ ＝ ", ^EmsInput("KanaName"), !
+        Set ^EmsCursorPosition("KanaName") = $Y
+        Write ?4, "4. 住　　所 ＝ ", ^EmsInput("Address"), !
+        Set ^EmsCursorPosition("Address") = $Y
         Quit
     }
 
-    New fields, i, fieldName
-    Set fields = $LISTBUILD("KanjiName", "KanaName", "Address")
-    For i=1:1:$LISTLENGTH(fields) {
-        Set fieldName = $LISTGET(fields, i)
-        Do InputField(fieldName, .input, .position)
-    }
     Quit
 
-InputField(fieldName, input, position)
+InputField(fieldName)
     New value
     While 1 {
         If fieldName = "EmployeeNumber" {
@@ -85,8 +81,8 @@ InputField(fieldName, input, position)
             If '$$IsValidEmpNumber^EmsApp(value) {
                 Write "❌ Invalid Employee Number!", !
             } Else {
-                Set position("EmployeeNumber") = $Y 
-                Set input("EmployeeNumber") = value
+                Set ^EmsCursorPosition("EmployeeNumber") = $Y 
+                Set ^EmsInput("EmployeeNumber") = value
                 Quit
             }
         }
@@ -95,8 +91,8 @@ InputField(fieldName, input, position)
             If '$$IsZenkaku^EmsApp(value) {
                 Write "❌ Kanji Name must be Zenkaku characters!", !
             } Else {
-                Set position("KanjiName") = $Y 
-                Set input("KanjiName") = value
+                Set ^EmsCursorPosition("KanjiName") = $Y 
+                Set ^EmsInput("KanjiName") = value
                 Quit
             }
         }
@@ -105,8 +101,8 @@ InputField(fieldName, input, position)
             If '$$IsHankaku^EmsApp(value) {
                 Write "❌ Kana Name must be Hankaku characters!", !
             } Else {
-                Set position("KanaName") = $Y 
-                Set input("KanaName") = value
+                Set ^EmsCursorPosition("KanaName") = $Y 
+                Set ^EmsInput("KanaName") = value
                 Quit
             }
         }
@@ -115,8 +111,8 @@ InputField(fieldName, input, position)
             If '$$IsZenkaku^EmsApp(value) {
                 Write "❌ Address must be Zenkaku characters!", !
             } Else {
-                Set position("Address") = $Y
-                Set input("Address") = value
+                Set ^EmsCursorPosition("Address") = $Y
+                Set ^EmsInput("Address") = value
                 Quit
             }
         }
@@ -135,20 +131,19 @@ SetCursor(row)
     Write $C(27)_"[0J"
     Quit
 
-AskOperationKey(input, position)
+AskOperationKey
     New opKey
     Read !, "<@:登録 DEL:削除 /:一行上げる //:社員番号へ $:終了 行番号> = ", opKey, !!
-    Set position("OperationKey") = $Y 
-    Set input("OperationKey") = opKey
+    Set ^EmsCursorPosition("OperationKey") = $Y 
+    Set ^EmsInput("OperationKey") = opKey
     Quit
 
-Create(input)
-
-    Set id = input("EmployeeNumber")
-    Set ^Employee(id, "empNumber") = input("EmployeeNumber")
-    Set ^Employee(id, "empKanjiName") = input("KanjiName")
-    Set ^Employee(id, "empKanaName") = input("KanaName")
-    Set ^Employee(id, "empAddress") = input("Address")
+Create
+    Set id = ^EmsInput("EmployeeNumber")
+    Set ^Employee(id, "empNumber") = ^EmsInput("EmployeeNumber")
+    Set ^Employee(id, "empKanjiName") = ^EmsInput("KanjiName")
+    Set ^Employee(id, "empKanaName") = ^EmsInput("KanaName")
+    Set ^Employee(id, "empAddress") = ^EmsInput("Address")
 
     Write !, "✅ Employee registered successfully!", !
     Quit
@@ -163,36 +158,24 @@ Delete(id)
     Write !,"✅ Employee ", id, " Successfully deleted!", !
     Quit
 
-#; ShowData(id)
-#;     If '$Data(^Employee(id)) {
-#;         Write "❌ Unregistered data"
-#;         Quit
-#;     }
 
-#;     Write !, "社員番号 ＝ ", ^Employee(id, "empNumber"), !
-#;     Write "氏名漢字 ＝ ", ^Employee(id, "empKanjiName"), !
-#;     Write "氏名カナ ＝ ", ^Employee(id, "empKanaName"), !
-#;     Write "住　　所 ＝ ", ^Employee(id, "empAddress"), !
-#;     Quit
-
-HandleMoveUp(fields, currentPosition, input, position)
+HandleMoveUp(fields, currentPosition)
     If currentPosition > 1 {
         Set currentPosition = currentPosition - 1
         Set fieldName = $LISTGET(fields, currentPosition)
-        Do SetCursor(position(fieldName))
-        Do InputField(fieldName, .input, .position)
+        Do SetCursor(^EmsCursorPosition(fieldName))
+        Do InputField(fieldName)
     } Else {
         Write "⚠️ Already at the first field!", !
     }
     Quit
 
-HandleMoveToStart(fields, currentPosition, input, position)
+HandleMoveToStart(fields, currentPosition)
     #; Set currentPosition = 1
     #; Set fieldName = $LISTGET(fields, currentPosition)
     Set fieldName = "EmployeeNumber"
-    Do SetCursor(position(fieldName))
-    Do InputField(fieldName, .input, .position)
-    #; Do Prompt(.input)
+    Do SetCursor(^EmsCursorPosition(fieldName))
+    Do InputField(fieldName)
     Set currentPosition = $LISTLENGTH(fields) + 1 
     Quit
 
@@ -213,28 +196,3 @@ IsHankaku(value)
         Quit 1
     }
     Quit 0
-
-#; Validate(input)
-#;     Set isValid = 1
-
-#;     If (input("EmployeeNumber")'?.N) || (input("EmployeeNumber") < 0) || (input("EmployeeNumber") > 9999) {
-#;         Write "❌ Invalid Employee Number!", !
-#;         Set isValid = 0
-#;     }
-
-#;     If '$$IsZenkaku^EmsApp(input("KanjiName")) {
-#;         Write "❌ Kanji Name must be Zenkaku characters!", !
-#;         Set isValid = 0
-#;     }
-
-#;     If '$$IsHankaku^EmsApp(input("KanaName")) {
-#;         Write "❌ Kana Name must be Hankaku characters!", !
-#;         Set isValid = 0
-#;     }
-
-#;     If '$$IsZenkaku^EmsApp(input("Address")) {
-#;         Write "❌ Address must be Zenkaku characters!", !
-#;         Set isValid = 0
-#;     }
-
-#;     Quit isValid
