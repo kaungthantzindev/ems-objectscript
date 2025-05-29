@@ -80,6 +80,7 @@ InputField(fieldName)
         If fieldName = "EmployeeNumber" {
             Read ?4, "1. 社員番号 ＝ ", value
             Set ^EmsCursorPosition("EmployeeNumber") = $Y + 1
+            
             If '$$IsValidEmpNumber^EmsApp(value) {
                 Write ?30, "❌ Invalid Employee Number!", !
             } Else {
@@ -91,6 +92,11 @@ InputField(fieldName)
         ElseIf fieldName = "KanjiName" {
             Read ?4, "2. 氏名漢字 ＝ ", value
             Set ^EmsCursorPosition("KanjiName") = $Y
+
+            If value = "/" {
+                Do HandleMoveUp("EmployeeNumber")
+            }
+
             If '$$IsZenkaku^EmsApp(value) {
                 Write ?30, "❌ Kanji Name must be Zenkaku characters!", !
             } Else {
@@ -102,6 +108,11 @@ InputField(fieldName)
         ElseIf fieldName = "KanaName" {
             Read ?4, "3. 氏名カナ ＝ ", value
             Set ^EmsCursorPosition("KanaName") = $Y
+
+            If value = "/" {
+                Do HandleMoveUp("KanjiName")
+            }
+
             If '$$IsHankaku^EmsApp(value) {
                 Write ?30, "❌ Kana Name must be Hankaku characters!", !
             } Else {
@@ -114,6 +125,11 @@ InputField(fieldName)
         ElseIf fieldName = "Address" {
             Read ?4, "4. 住　　所 ＝ ", value
             Set ^EmsCursorPosition("Address") = $Y + 1
+
+            If value = "/" {
+                Do HandleMoveUp("KanaName")
+            }
+
             If '$$IsZenkaku^EmsApp(value) {
                 Write ?30, "❌ Address must be Zenkaku characters!", !
             } Else {
@@ -156,7 +172,7 @@ Create
 
 Delete(id)
     If '$Data(^Employee(id)) {
-        Write "❌ Unregistered data", !
+        Do ShowSuccessMessage("❌ Unregistered data")
         Quit
     }
 
