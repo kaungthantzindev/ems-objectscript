@@ -93,9 +93,9 @@ InputField(fieldName)
             Read ?4, "2. 氏名漢字 ＝ ", value
             Set ^EmsCursorPosition("KanjiName") = $Y
 
-            If value = "/" {
-                Do HandleMoveUp("EmployeeNumber")
-            }
+            #; If value = "/" {
+            #;     Do HandleMoveUp("EmployeeNumber")
+            #; }
 
             If '$$IsZenkaku^EmsApp(value) {
                 Do ShowErrorMessage("❌ Kanji Name must be Zenkaku characters!")
@@ -109,9 +109,9 @@ InputField(fieldName)
             Read ?4, "3. 氏名カナ ＝ ", value
             Set ^EmsCursorPosition("KanaName") = $Y
 
-            If value = "/" {
-                Do HandleMoveUp("KanjiName")
-            }
+            #; If value = "/" {
+            #;     Do HandleMoveUp("KanjiName")
+            #; }
 
             If '$$IsHankaku^EmsApp(value) {
                 Do ShowErrorMessage("❌ Kana Name must be Hankaku characters!")
@@ -126,9 +126,9 @@ InputField(fieldName)
             Read ?4, "4. 住　　所 ＝ ", value
             Set ^EmsCursorPosition("Address") = $Y + 1
 
-            If value = "/" {
-                Do HandleMoveUp("KanaName")
-            }
+            #; If value = "/" {
+            #;     Do HandleMoveUp("KanaName")
+            #; }
 
             If '$$IsZenkaku^EmsApp(value) {
                 Do ShowErrorMessage("❌ Address must be Zenkaku characters!")
