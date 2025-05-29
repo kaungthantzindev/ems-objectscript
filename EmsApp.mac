@@ -15,9 +15,6 @@ Start
     While state {
         Do Prompt
 
-        Set fields = $LISTBUILD("KanjiName", "KanaName", "Address")
-        Set currentPosition = $LISTLENGTH(fields) + 1
-
         While 1 {
             Do AskOperationKey
 
@@ -35,10 +32,11 @@ Start
                 Quit
             }
             ElseIf ^EmsInput("OperationKey") = "/" {
-                Do HandleMoveUp(fields, .currentPosition)
+                Do HandleMoveUp("Address")
             }
             ElseIf ^EmsInput("OperationKey") = "//" {
-                Do HandleMoveToStart(fields, .currentPosition)
+                Do HandleMoveUp("EmployeeNumber")
+                Quit
             }
             Else {
                 Write "⚠️ Unknown operation key!", !
@@ -77,40 +75,43 @@ InputField(fieldName)
     While 1 {
         If fieldName = "EmployeeNumber" {
             Read ?4, "1. 社員番号 ＝ ", value, !
+            Set ^EmsCursorPosition("EmployeeNumber") = $Y 
             If '$$IsValidEmpNumber^EmsApp(value) {
                 Write "❌ Invalid Employee Number!", !
             } Else {
-                Set ^EmsCursorPosition("EmployeeNumber") = $Y 
                 Set ^EmsInput("EmployeeNumber") = value
                 Quit
             }
         }
         ElseIf fieldName = "KanjiName" {
             Read ?4, "2. 氏名漢字 ＝ ", value, !
+            Set ^EmsCursorPosition("KanjiName") = $Y 
             If '$$IsZenkaku^EmsApp(value) {
                 Write "❌ Kanji Name must be Zenkaku characters!", !
             } Else {
-                Set ^EmsCursorPosition("KanjiName") = $Y 
+                
                 Set ^EmsInput("KanjiName") = value
                 Quit
             }
         }
         ElseIf fieldName = "KanaName" {
             Read ?4, "3. 氏名カナ ＝ ", value, !
+            Set ^EmsCursorPosition("KanaName") = $Y 
             If '$$IsHankaku^EmsApp(value) {
                 Write "❌ Kana Name must be Hankaku characters!", !
             } Else {
-                Set ^EmsCursorPosition("KanaName") = $Y 
+                
                 Set ^EmsInput("KanaName") = value
                 Quit
             }
         }
         ElseIf fieldName = "Address" {
             Read ?4, "4. 住　　所 ＝ ", value, !
+            Set ^EmsCursorPosition("Address") = $Y
             If '$$IsZenkaku^EmsApp(value) {
                 Write "❌ Address must be Zenkaku characters!", !
             } Else {
-                Set ^EmsCursorPosition("Address") = $Y
+                
                 Set ^EmsInput("Address") = value
                 Quit
             }
@@ -126,7 +127,7 @@ SetCursor(row)
     #; WRITE !,$CHAR(27)_"[1m"
     #; WRITE *27,*91,*49,*109
     Write $CHAR(27)_"["_row_"H"
-    set $Y = $Y
+    Set $Y = row - 1
     Write $C(27)_"[0J"
     Quit
 
@@ -158,15 +159,17 @@ Delete(id)
     Quit
 
 
-HandleMoveUp(fields, currentPosition)
-    If currentPosition > 1 {
-        Set currentPosition = currentPosition - 1
-        Set fieldName = $LISTGET(fields, currentPosition)
+HandleMoveUp(fieldName)
+    #; If currentPosition > 1 {
+    #;     Set currentPosition = currentPosition - 1
+    #;     Set fieldName = $LISTGET(fields, currentPosition)
         Do SetCursor(^EmsCursorPosition(fieldName))
-        Do InputField(fieldName)
-    } Else {
-        Write "⚠️ Already at the first field!", !
-    }
+        If fieldName '= "EmployeeNumber" {
+            Do InputField(fieldName)
+        }
+    #; } Else {
+    #;     Write "⚠️ Already at the first field!", !
+    #; }
     Quit
 
 HandleMoveToStart(fields, currentPosition)
