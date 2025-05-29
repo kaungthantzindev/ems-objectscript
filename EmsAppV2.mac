@@ -1,0 +1,26 @@
+ROUTINE EmsAppV2
+
+Main() {
+    Write #
+    Write "=========================="
+    Write !!, "＊＊＊社員登録PG＊＊＊", !!!
+    Do Start
+
+    Quit
+}
+
+Start() {
+   Do Prompt
+}
+
+Prompt() {
+    Set empNumber = $$InputField("1. Employee Number : ")
+
+}
+
+InputField(msg) {
+    Write ?4, msg
+    Read inputValue
+
+    return inputValue
+}
