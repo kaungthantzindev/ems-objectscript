@@ -82,7 +82,7 @@ InputField(fieldName)
             Set ^EmsCursorPosition("EmployeeNumber") = $Y + 1
             
             If '$$IsValidEmpNumber^EmsApp(value) {
-                Write ?30, "❌ Invalid Employee Number!", !
+                Do ShowErrorMessage("❌ Invalid Employee Number!")
             } Else {
                 Write !
                 Set ^EmsInput("EmployeeNumber") = value
@@ -98,7 +98,7 @@ InputField(fieldName)
             }
 
             If '$$IsZenkaku^EmsApp(value) {
-                Write ?30, "❌ Kanji Name must be Zenkaku characters!", !
+                Do ShowErrorMessage("❌ Kanji Name must be Zenkaku characters!")
             } Else {
                 Write !
                 Set ^EmsInput("KanjiName") = value
@@ -114,7 +114,7 @@ InputField(fieldName)
             }
 
             If '$$IsHankaku^EmsApp(value) {
-                Write ?30, "❌ Kana Name must be Hankaku characters!", !
+                Do ShowErrorMessage("❌ Kana Name must be Hankaku characters!")
             } Else {
                 
                 Write !
@@ -131,7 +131,7 @@ InputField(fieldName)
             }
 
             If '$$IsZenkaku^EmsApp(value) {
-                Write ?30, "❌ Address must be Zenkaku characters!", !
+                Do ShowErrorMessage("❌ Address must be Zenkaku characters!")
             } Else {
                 Write !
                 Set ^EmsInput("Address") = value
@@ -194,14 +194,14 @@ HandleMoveUp(fieldName)
     #; }
     Quit
 
-HandleMoveToStart(fields, currentPosition)
-    #; Set currentPosition = 1
-    #; Set fieldName = $LISTGET(fields, currentPosition)
-    Set fieldName = "EmployeeNumber"
-    Do SetCursor(^EmsCursorPosition(fieldName))
-    Do InputField(fieldName)
-    Set currentPosition = $LISTLENGTH(fields) + 1 
-    Quit
+#; HandleMoveToStart(fields, currentPosition)
+#;     #; Set currentPosition = 1
+#;     #; Set fieldName = $LISTGET(fields, currentPosition)
+#;     Set fieldName = "EmployeeNumber"
+#;     Do SetCursor(^EmsCursorPosition(fieldName))
+#;     Do InputField(fieldName)
+#;     Set currentPosition = $LISTLENGTH(fields) + 1 
+#;     Quit
 
 IsValidEmpNumber(value)
     If (value'?1n.N) || (value < 0) || (value > 9999) {
@@ -221,11 +221,15 @@ IsHankaku(value)
     }
     Quit 0
 
+ShowErrorMessage(msg)
+    Write ?30, $c(27)_"[1m"_$c(27)_"[31m"_msg_$c(27)_"[0m", !
+    Quit
+
 ShowSuccessMessage(msg)
     Write #
-    Write "###################################", !
+    Write $c(27)_"[1m"_$c(27)_"[32m"_"###################################", !
     Write ?10 , msg, !
-    Write "###################################"
+    Write "###################################"_$c(27)_"[0m"
     Hang 1
     Write #
     GOTO Main
