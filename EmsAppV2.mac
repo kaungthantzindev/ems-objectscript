@@ -4,67 +4,57 @@ ROUTINE EmsAppV2
 #; ^Employee is Employee model global data
 #; ^EmsCursorPosition is a $Y position of each input (eg. ^EmsCursorPosition("empNumber") -> is recorded cursor position of employee number input
 
-Main() {
+Main
     Write #
     Write "=========================="
     Write !!, "＊＊＊社員登録PG＊＊＊", !!
     Do Start
 
-    Kill ^EmsCursorPosition
+    Kill ^EmsCursorPosition, ^EmpDto, ^OperationKey
     Quit
-}
 
 Start() {
-   Do Prompt
+   Do Prompt("empNumber")
+   Do Prompt("kanjiName")
+   Do Prompt("kanaName")
+   Do Prompt("address")
+   Write !
+   Do Prompt("operationKey")
 }
 
-Prompt() {
-   
-        Set empNumber = $$InputField("empNumber")
-        Set ^EmpDto("EmployeeNumber") = empNumber
-
-        Set kanjiName = $$InputField("kanjiName")
-        Set ^EmpDto(empNumber, "KanjiName") = kanjiName
-
-        Set kanaName = $$InputField("kanaName")
-        Set ^EmpDto(empNumber, "KanaName") = kanaName
- 
-        Set address = $$InputField("address")
-        Set ^EmpDto(empNumber, "Address") = address
-       
-        Write !
-        Set operationKey = $$InputField("operationKey")
-        Set ^OperationKey = operationKey
-       
-    }
-
 #; 
-InputField(type) {
-    Set value = ""
-    Set ^CurrentInputField = type
-
+Prompt(type) {
     While (1) {
         Write !, ?4, $SELECT(
-            type = "empNumber" : " Employee Number : ",
-            type = "kanjiName" : " KanjiName : ",
-            type = "kanaName" : " KanaName : ",
-            type = "address" : " Address : ",
-            type = "operationKey" : "Enter a command : "
+            type = "empNumber" : "1. 社員番号 ＝ ",
+            type = "kanjiName" : "2. 氏名漢字 ＝ ",
+            type = "kanaName" : "3. 氏名カナ ＝ ",
+            type = "address" : "4. 住　　所 ＝ ",
+            type = "operationKey" : "<@:登録 -:削除 /:↑ //:番号 $:終了 行>: "
         )
         Read inputValue
-        Set ^EmsCursorPosition(type) = $Y - 1
+        Set ^EmsCursorPosition(type) = $SELECT(
+            type = "empNumber": $Y + 1,
+            type = "operationKey": $Y + 1,
+            1: $Y
+        )
 
         If inputValue = "/" {
             Do SetCursor(^EmsCursorPosition(type))
-            Set previousInputField = $$GetPreviousInputField($GET(^CurrentInputField, type))
-            if previousInputField '= "" {
-                Do InputField(previousInputField)
+            Set previousInputField = $$GetPreviousInputField(type)
+            If previousInputField '= "" {
+                Do Prompt(previousInputField)
             }
             Continue
         }
 
         If inputValue = "//" {
             Do SetCursor(^EmsCursorPosition("empNumber"))
+            Do Prompt("empNumber")
+            Set nextInputField = $$GetNextInputField("empNumber")
+            If nextInputField '= "" {
+                Do Prompt(nextInputField)
+            }
             Continue
         }
 
@@ -77,12 +67,82 @@ InputField(type) {
                 type = "operationKey" : "Invalid Opeartion Key"
             ))
         } Else {
-            Set value = inputValue
+            Set tempGlobal = $$GetCurrentGlobalName(type)
+            Set @tempGlobal = inputValue
+
+            If type = "empNumber" {
+                Do ShowExistingData(inputValue)
+            }
+
+            If type = "operationKey" {
+                Do Operation(inputValue)
+            }
             Quit
         }
     }
+}
 
-    Return value
+Operation(key) {
+    If key = "@" {
+        Do Create
+    }
+
+    If key = "DEL" {
+        Do Delete(^EmpDto("empNumber"))
+    }
+
+    If key = "$" {
+        #; exist
+    }
+
+    Quit
+}
+
+ShowExistingData(id) {
+    If '$DATA(^Employee(id)) {
+        Quit
+    }
+
+    Set ^EmpDto("empNumber") = $GET(^Employee(id))
+
+    Write !, ?4, "2. 氏名漢字 ＝ ", $GET(^EmpDto(id, "kanjiName"))
+    Set ^EmsCursorPosition("kanjiName") = $Y
+    Set ^EmpDto(id, "kanjiName") = $GET(^Employee(id, "kanjiName"))
+
+    Write !, ?4, "3. 氏名カナ ＝ ", $GET(^EmpDto(id, "kanaName"))
+    Set ^EmsCursorPosition("kanaName") = $Y
+    Set ^EmpDto(id, "kanaName") = $GET(^Employee(id, "kanaName"))
+
+    Write !, ?4, "4. 住　　所 ＝ ", $GET(^EmpDto(id, "address"))
+    Set ^EmsCursorPosition("address") = $Y + 1
+    Set ^EmpDto(id, "address") = $GET(^Employee(id, "address"))
+
+    Write !
+    Do Prompt("operationKey")
+
+    Quit
+}
+
+Create() {
+    Set id = $GET(^EmpDto("empNumber"))
+    Set ^Employee(id) = $GET(^EmpDto("empNumber"))
+    Set ^Employee(id, "kanjiName") = $GET(^EmpDto("kanjiName"))
+    Set ^Employee(id, "kanaName") = $GET(^EmpDto("kanaName"))
+    Set ^Employee(id, "address") = $GET(^EmpDto("address"))
+
+    Do ShowSuccessMessage("Success")
+    Quit
+}
+
+Delete(id) {
+    If '$DATA(^Employee(id)) {
+        Do ShowSuccessMessage("❌ Unregistered data")
+        Quit
+    }
+
+    Kill ^Employee(id)
+    Do ShowSuccessMessage("Success")
+    Quit
 }
 
 SetCursor(row)
@@ -90,6 +150,14 @@ SetCursor(row)
     Set $Y = row - 1
     Write $CHAR(27)_"[0J"
     Quit
+
+GetCurrentGlobalName(type) {
+    Return $SELECT(
+        type = "empNumber": $NAME(^EmpDto(type)),
+        type = "operationKey": $NAME(^OperationKey),
+        1: $NAME(^EmpDto(type))
+    )
+}
 
 GetPreviousInputField(current) {
     Return $SELECT(
@@ -167,3 +235,13 @@ IsValidate(value, type) {
         Return $$IsValidOperationKey(value)
     }
 }
+
+ShowSuccessMessage(msg)
+    Write #
+    Write $CHAR(27)_"[1m"_$CHAR(27)_"[32m"_"###################################", !
+    Write ?10 , msg, !
+    Write "###################################"_$CHAR(27)_"[0m"
+    Hang 1
+    Write #
+    Goto Main
+    Quit
