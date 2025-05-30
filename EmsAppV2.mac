@@ -1,11 +1,16 @@
 ROUTINE EmsAppV2
 
+#; ^EmpDto is Employee Data Transfer Object
+#; ^Employee is Employee model global data
+#; ^EmsCursorPosition is a $Y position of each input (eg. ^EmsCursorPosition("empNumber") -> is recorded cursor position of employee number input
+
 Main() {
     Write #
     Write "=========================="
-    Write !!, "＊＊＊社員登録PG＊＊＊", !!!
+    Write !!, "＊＊＊社員登録PG＊＊＊", !!
     Do Start
 
+    Kill ^EmsCursorPosition
     Quit
 }
 
@@ -14,13 +19,151 @@ Start() {
 }
 
 Prompt() {
-    Set empNumber = $$InputField("1. Employee Number : ")
+   
+        Set empNumber = $$InputField("empNumber")
+        Set ^EmpDto("EmployeeNumber") = empNumber
 
+        Set kanjiName = $$InputField("kanjiName")
+        Set ^EmpDto(empNumber, "KanjiName") = kanjiName
+
+        Set kanaName = $$InputField("kanaName")
+        Set ^EmpDto(empNumber, "KanaName") = kanaName
+ 
+        Set address = $$InputField("address")
+        Set ^EmpDto(empNumber, "Address") = address
+       
+        Write !
+        Set operationKey = $$InputField("operationKey")
+        Set ^OperationKey = operationKey
+       
+    }
+
+#; 
+InputField(type) {
+    Set value = ""
+    Set ^CurrentInputField = type
+
+    While (1) {
+        Write !, ?4, $SELECT(
+            type = "empNumber" : " Employee Number : ",
+            type = "kanjiName" : " KanjiName : ",
+            type = "kanaName" : " KanaName : ",
+            type = "address" : " Address : ",
+            type = "operationKey" : "Enter a command : "
+        )
+        Read inputValue
+        Set ^EmsCursorPosition(type) = $Y - 1
+
+        If inputValue = "/" {
+            Do SetCursor(^EmsCursorPosition(type))
+            Set previousInputField = $$GetPreviousInputField($GET(^CurrentInputField, type))
+            if previousInputField '= "" {
+                Do InputField(previousInputField)
+            }
+            Continue
+        }
+
+        If inputValue = "//" {
+            Do SetCursor(^EmsCursorPosition("empNumber"))
+            Continue
+        }
+
+        If '$$IsValidate(inputValue, type) {
+            Do ShowValidationErrorMessage($SELECT(
+                type = "empNumber" : "Invalid Emp Number",
+                type = "kanjiName" : "Invalid Kanji Name",
+                type = "kanaName" : "Invalid Kana Name",
+                type = "address" : "Invalid address",
+                type = "operationKey" : "Invalid Opeartion Key"
+            ))
+        } Else {
+            Set value = inputValue
+            Quit
+        }
+    }
+
+    Return value
 }
 
-InputField(msg) {
-    Write ?4, msg
-    Read inputValue
+SetCursor(row)
+    Write $CHAR(27)_"["_row_"H"
+    Set $Y = row - 1
+    Write $CHAR(27)_"[0J"
+    Quit
 
-    return inputValue
+GetPreviousInputField(current) {
+    Return $SELECT(
+        current = "empNumber": "",
+        current = "kanjiName": "empNumber",
+        current = "kanaName" : "kanjiName",
+        current = "address" : "kanaName",
+        current = "operationKey": "address",
+        1: ""
+    )
+}
+
+GetNextInputField(current) {
+    Return $SELECT(
+        current = "empNumber": "kanjiName",
+        current = "kanjiName": "kanaName",
+        current = "kanaName": "address",
+        current = "address": "operationKey",
+        current = "operationKey": "",
+        1: ""
+    )
+}
+
+ShowValidationErrorMessage(msg) {
+    Write ?34, $CHAR(27)_"[1m"_$CHAR(27)_"[31m"_msg_$CHAR(27)_"[0m"
+    Quit
+}
+
+IsValidOperationKey(value) {
+    If (value = "@") || (value = "/") || (value = "//") || (value = "DEL") || (value = "$") {
+        Quit 1
+    }
+
+    Quit 0
+}
+
+IsValidEmpNumber(value) {
+    If (value'?1n.N) || (value < 0) || (value > 9999) {
+        Quit 0
+    }
+    Quit 1
+}
+IsZenkaku(value) {
+    If $MATCH(value, "^[一-龥ぁ-んァ-ヶー　]+$") {
+        Quit 1
+    }
+    Quit 0
+}
+
+IsHankaku(value) {
+    If $MATCH(value, "^[ｦ-ﾟ ｡-ﾟ]+$") {
+        Quit 1
+    }
+    Quit 0
+}
+
+IsValidate(value, type) {
+    If (type = "empNumber") {
+        Return $$IsValidEmpNumber(value)
+    }
+
+    If (type = "kanjiName") {
+        Return $$IsZenkaku(value)
+    }
+
+    If (type = "kanaName") {
+        Return $$IsHankaku(value)
+    }
+
+    If (type = "address") {
+        Return $$IsZenkaku(value)
+    }
+
+    If (type = "operationKey") {
+        Return $$IsValidOperationKey(value)
+    }
 }
