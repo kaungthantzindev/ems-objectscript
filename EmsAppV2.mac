@@ -18,7 +18,7 @@ Start() {
    Do Prompt("kanjiName")
    Do Prompt("kanaName")
    Do Prompt("address")
-#;    Write !
+   Write !
    Do Prompt("operationKey")
 }
 
@@ -34,11 +34,8 @@ Prompt(type) {
         )
         Read inputValue
         Set ^EmsCursorPosition(type) = $Y
-        #; $SELECT(
-        #;     type = "empNumber": $Y + 1,
-        #;     type = "address": $Y + 1,
-        #;     1: $Y + 1
-        #; )
+        Set ^CurrentInputField = type
+       
         
         If inputValue = "/" {
             Set previousInputField = $$GetPreviousInputField(type)
@@ -52,11 +49,11 @@ Prompt(type) {
         If inputValue = "//" {
             Do SetCursor(^EmsCursorPosition("empNumber"))
             Do Prompt("empNumber")
-            Set nextInputField = $$GetNextInputField("empNumber")
-            If nextInputField '= "" {
-                Do Prompt(nextInputField)
-            }
-            Continue
+            #; Set nextInputField = $$GetNextInputField(^CurrentInputField)
+            #; If nextInputField '= "" {
+            #;     Do Prompt(nextInputField)
+            #; }
+            #; Quit
         }
 
         If '$$IsValidate(inputValue, type) {
@@ -108,7 +105,7 @@ ShowExistingData(id) {
 
     Set ^EmpDto("empNumber") = $GET(^Employee(id))
 
-    Write !, ?4, "2. 氏名漢字 ＝ ", $GET(^EmpDto(id, "kanjiName"))
+    Write ?4, "2. 氏名漢字 ＝ ", $GET(^EmpDto(id, "kanjiName"))
     Set ^EmsCursorPosition("kanjiName") = $Y
     Set ^EmpDto(id, "kanjiName") = $GET(^Employee(id, "kanjiName"))
 
@@ -120,7 +117,7 @@ ShowExistingData(id) {
     Set ^EmsCursorPosition("address") = $Y
     Set ^EmpDto(id, "address") = $GET(^Employee(id, "address"))
 
-    #; Write !
+    Write !!
     Do Prompt("operationKey")
 
     Quit
@@ -152,7 +149,7 @@ SetCursor(row)
     Set row = row + 1
     Write $CHAR(27)_"["_row_";"_5_"H"
     Set $Y = row - 1
-    Write $C(27)_"[0J"
+    Write $CHAR(27)_"[0J"
     Quit
 
 GetCurrentGlobalName(type) {
