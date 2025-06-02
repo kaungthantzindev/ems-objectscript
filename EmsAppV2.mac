@@ -133,18 +133,18 @@ Create() {
     Set ^Employee(id, "kanaName") = $GET(^EmpDto("kanaName"))
     Set ^Employee(id, "address") = $GET(^EmpDto("address"))
 
-    Do ShowSuccessMessage("Success")
+    Do ShowMessage("Success")
     Quit
 }
 
 Delete(id) {
     If '$DATA(^Employee(id)) {
-        Do ShowSuccessMessage("❌ Unregistered data")
+        Do ShowMessage("❌ Unregistered data", "error")
         Quit
     }
 
     Kill ^Employee(id)
-    Do ShowSuccessMessage("Success")
+    Do ShowMessage("Success")
     Quit
 }
 
@@ -247,9 +247,15 @@ IsValidate(value, type) {
     }
 }
 
-ShowSuccessMessage(msg)
+ShowMessage(msg, type = "success")
+    #; 31m -> red
+    #; 32m -> green
+    Set color = $SELECT(
+        type = "error": "[31m",
+        1: "[32m"
+    )
     Write #
-    Write $CHAR(27)_"[1m"_$CHAR(27)_"[32m"_"###################################", !
+    Write $CHAR(27)_"[1m"_$CHAR(27)_color_"###################################", !
     Write ?10 , msg, !
     Write "###################################"_$CHAR(27)_"[0m"
     Hang 1
