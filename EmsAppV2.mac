@@ -211,6 +211,13 @@ IsZenkaku(value) {
     Quit 0
 }
 
+IsZenkakuOrAlphabet(value) {
+    If $MATCH(value, "^[一-龥ぁ-んァ-ヶー　]+$") || $MATCH(value, "^[A-Za-z]+$") {
+        Quit 1
+    }
+    Quit 0
+}
+
 IsHankaku(value) {
     If $MATCH(value, "^[ｦ-ﾟ ｡-ﾟ]+$") {
         Quit 1
@@ -232,7 +239,7 @@ IsValidate(value, type) {
     }
 
     If (type = "address") {
-        Return $$IsZenkaku(value)
+        Return $$IsZenkakuOrAlphabet(value)
     }
 
     If (type = "operationKey") {
