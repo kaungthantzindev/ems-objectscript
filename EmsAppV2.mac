@@ -18,14 +18,14 @@ Start() {
    Do Prompt("kanjiName")
    Do Prompt("kanaName")
    Do Prompt("address")
-   Write !
+#;    Write !
    Do Prompt("operationKey")
 }
 
 #; 
 Prompt(type) {
     While (1) {
-        Write !, ?4, $SELECT(
+        Write ?4, $SELECT(
             type = "empNumber" : "1. 社員番号 ＝ ",
             type = "kanjiName" : "2. 氏名漢字 ＝ ",
             type = "kanaName" : "3. 氏名カナ ＝ ",
@@ -33,16 +33,17 @@ Prompt(type) {
             type = "operationKey" : "<@:登録 -:削除 /:↑ //:番号 $:終了 行>: "
         )
         Read inputValue
-        Set ^EmsCursorPosition(type) = $SELECT(
-            type = "empNumber": $Y + 1,
-            type = "operationKey": $Y + 1,
-            1: $Y
-        )
-
+        Set ^EmsCursorPosition(type) = $Y
+        #; $SELECT(
+        #;     type = "empNumber": $Y + 1,
+        #;     type = "address": $Y + 1,
+        #;     1: $Y + 1
+        #; )
+        
         If inputValue = "/" {
-            Do SetCursor(^EmsCursorPosition(type))
             Set previousInputField = $$GetPreviousInputField(type)
             If previousInputField '= "" {
+                Do SetCursor(^EmsCursorPosition(previousInputField))
                 Do Prompt(previousInputField)
             }
             Continue
@@ -66,7 +67,9 @@ Prompt(type) {
                 type = "address" : "Invalid address",
                 type = "operationKey" : "Invalid Opeartion Key"
             ))
+            Write !
         } Else {
+            Write !
             Set tempGlobal = $$GetCurrentGlobalName(type)
             Set @tempGlobal = inputValue
 
@@ -114,10 +117,10 @@ ShowExistingData(id) {
     Set ^EmpDto(id, "kanaName") = $GET(^Employee(id, "kanaName"))
 
     Write !, ?4, "4. 住　　所 ＝ ", $GET(^EmpDto(id, "address"))
-    Set ^EmsCursorPosition("address") = $Y + 1
+    Set ^EmsCursorPosition("address") = $Y
     Set ^EmpDto(id, "address") = $GET(^Employee(id, "address"))
 
-    Write !
+    #; Write !
     Do Prompt("operationKey")
 
     Quit
@@ -146,9 +149,10 @@ Delete(id) {
 }
 
 SetCursor(row)
-    Write $CHAR(27)_"["_row_"H"
+    Set row = row + 1
+    Write $CHAR(27)_"["_row_";"_5_"H"
     Set $Y = row - 1
-    Write $CHAR(27)_"[0J"
+    Write $C(27)_"[0J"
     Quit
 
 GetCurrentGlobalName(type) {
