@@ -13,17 +13,20 @@ Main
     Kill ^EmsCursorPosition, ^EmpDto, ^OperationKey
     Quit
 
-Start() {
+Start
+
    Do Prompt("empNumber")
    Do Prompt("kanjiName")
    Do Prompt("kanaName")
    Do Prompt("address")
-   Write !
-   Do Prompt("operationKey")
-}
+   Do Prompt("operationKey", "!")
+
 
 #; 
-Prompt(type) {
+Prompt(type, newline = "") {
+    If newline '="" {
+        Write @newline
+    }
     While (1) {
         Write ?4, $SELECT(
             type = "empNumber" : "1. 社員番号 ＝ ",
@@ -56,7 +59,6 @@ Prompt(type) {
                     Do Prompt(nextInputField)
                 }
             }
-            Quit
         }
 
         If '$$IsValidate(inputValue, type) {
@@ -108,20 +110,19 @@ ShowExistingData(id) {
 
     Set ^EmpDto("empNumber") = $GET(^Employee(id))
 
-    Write ?4, "2. 氏名漢字 ＝ ", $GET(^EmpDto(id, "kanjiName"))
+    Write ?4, "2. 氏名漢字 ＝ ", $GET(^Employee(id, "kanjiName"))
     Set ^EmsCursorPosition("kanjiName") = $Y
     Set ^EmpDto(id, "kanjiName") = $GET(^Employee(id, "kanjiName"))
 
-    Write !, ?4, "3. 氏名カナ ＝ ", $GET(^EmpDto(id, "kanaName"))
+    Write !, ?4, "3. 氏名カナ ＝ ", $GET(^Employee(id, "kanaName"))
     Set ^EmsCursorPosition("kanaName") = $Y
     Set ^EmpDto(id, "kanaName") = $GET(^Employee(id, "kanaName"))
 
-    Write !, ?4, "4. 住　　所 ＝ ", $GET(^EmpDto(id, "address"))
+    Write !, ?4, "4. 住　　所 ＝ ", $GET(^Employee(id, "address"))
     Set ^EmsCursorPosition("address") = $Y
     Set ^EmpDto(id, "address") = $GET(^Employee(id, "address"))
 
-    Write !!
-    Do Prompt("operationKey")
+    Do Prompt("operationKey", "!!")
 
     Quit
 }
