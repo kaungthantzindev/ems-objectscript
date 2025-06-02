@@ -49,11 +49,14 @@ Prompt(type) {
         If inputValue = "//" {
             Do SetCursor(^EmsCursorPosition("empNumber"))
             Do Prompt("empNumber")
-            #; Set nextInputField = $$GetNextInputField(^CurrentInputField)
-            #; If nextInputField '= "" {
-            #;     Do Prompt(nextInputField)
-            #; }
-            #; Quit
+            Set nextInputField = $$GetNextInputField(^CurrentInputField)
+            While (nextInputField '= "") {
+                Set nextInputField = $$GetNextInputField(^CurrentInputField)
+                If nextInputField '= "" {
+                    Do Prompt(nextInputField)
+                }
+            }
+            Quit
         }
 
         If '$$IsValidate(inputValue, type) {
