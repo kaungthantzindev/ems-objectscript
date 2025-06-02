@@ -156,11 +156,23 @@ SetCursor(row)
     Write $CHAR(27)_"[0J"
     Quit
 
+SetEscape(key) {
+    Write $CHAR(27)_key
+    Quit
+}
+
 GetCurrentGlobalName(type) {
     Return $SELECT(
         type = "empNumber": $NAME(^EmpDto(type)),
         type = "operationKey": $NAME(^OperationKey),
         1: $NAME(^EmpDto(type))
+    )
+}
+
+GetCurrentDefaultValue(type) {
+    return $SELECT(
+        type = "empNumber": $GET(^EmpDto("empNumber")),
+        1: $GET(^EmpDto(^EmpDto("empNumber"), type))
     )
 }
 
