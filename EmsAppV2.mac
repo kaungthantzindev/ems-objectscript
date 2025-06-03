@@ -69,7 +69,9 @@ Prompt(type, newline = "") {
                 type = "address" : "Invalid address",
                 type = "operationKey" : "Invalid Opeartion Key"
             ))
-            Write !
+            Do SetCursorWithoutClear(^EmsCursorPosition(type))
+            Hang 1
+            Do SetEscape("[K")
         } Else {
             Write !
             Set tempGlobal = $$GetCurrentGlobalName(type)
@@ -154,6 +156,13 @@ SetCursor(row)
     Write $CHAR(27)_"["_row_";"_5_"H"
     Set $Y = row - 1
     Write $CHAR(27)_"[0J"
+    Quit
+
+SetCursorWithoutClear(row)
+    Set row = row + 1
+    Write $CHAR(27)_"["_row_";"_5_"H"
+    Set $Y = row - 1
+    #; Write $CHAR(27)_"[0J"
     Quit
 
 SetEscape(key) {
