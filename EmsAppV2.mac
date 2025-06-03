@@ -35,17 +35,14 @@ Prompt(type, newline = "") {
             type = "address" : "4. 住　　所 ＝ ",
             type = "operationKey" : "<@:登録 -:削除 /:↑ //:番号 $:終了 行>: "
         )
+        Do SetEscape("[K")
         Read inputValue
         Set ^EmsCursorPosition(type) = $Y
         Set ^CurrentInputField = type
        
         
         If inputValue = "/" {
-            Set previousInputField = $$GetPreviousInputField(type)
-            If previousInputField '= "" {
-                Do SetCursor(^EmsCursorPosition(previousInputField))
-                Do Prompt(previousInputField)
-            }
+            Do HandleMoveUp(inputValue, type)
             Continue
         }
 
@@ -87,6 +84,28 @@ Prompt(type, newline = "") {
             Quit
         }
     }
+}
+
+HandleMoveUp(inputValue, type) {
+    Do SetDefaultValue(inputValue, type)
+
+    Set previousInputField = $$GetPreviousInputField(type)
+    If previousInputField '= "" {
+        Do SetCursor(^EmsCursorPosition(previousInputField))
+        If type = "operationKey" {
+            #; clear operation input line
+            Write $CHAR(27)_"[0J"
+        }
+        Do Prompt(previousInputField)
+    }
+}
+
+SetDefaultValue(inputValue, type) {
+    Do SetEscape("[D")
+    Set defaultValue = $$GetCurrentDefaultValue(type)
+    Set inputValue = defaultValue
+    Write defaultValue
+    Quit
 }
 
 Operation(key) {
@@ -155,7 +174,7 @@ SetCursor(row)
     Set row = row + 1
     Write $CHAR(27)_"["_row_";"_5_"H"
     Set $Y = row - 1
-    Write $CHAR(27)_"[0J"
+    #; Write $CHAR(27)_"[0J"
     Quit
 
 SetCursorWithoutClear(row)
@@ -179,7 +198,7 @@ GetCurrentGlobalName(type) {
 }
 
 GetCurrentDefaultValue(type) {
-    return $SELECT(
+    Return $SELECT(
         type = "empNumber": $GET(^EmpDto("empNumber")),
         1: $GET(^EmpDto(^EmpDto("empNumber"), type))
     )
