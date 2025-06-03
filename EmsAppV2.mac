@@ -20,6 +20,7 @@ Start
    Do Prompt("kanaName")
    Do Prompt("address")
    Do Prompt("operationKey", "!")
+   Quit
 
 
 #; 
@@ -40,6 +41,11 @@ Prompt(type, newline = "") {
         Set ^EmsCursorPosition(type) = $Y
         Set ^CurrentInputField = type
        
+       If inputValue ="" {
+            Do SetDefaultValue(inputValue , type)
+            Write !
+            Quit
+       }
         
         If inputValue = "/" {
             Do HandleMoveUp(inputValue, type)
@@ -47,15 +53,7 @@ Prompt(type, newline = "") {
         }
 
         If inputValue = "//" {
-            Do SetCursor(^EmsCursorPosition("empNumber"))
-            Do Prompt("empNumber")
-            Set nextInputField = $$GetNextInputField(^CurrentInputField)
-            While (nextInputField '= "") {
-                Set nextInputField = $$GetNextInputField(^CurrentInputField)
-                If nextInputField '= "" {
-                    Do Prompt(nextInputField)
-                }
-            }
+            Do HandleMoveToStart(inputValue , type)
         }
 
         If '$$IsValidate(inputValue, type) {
@@ -98,6 +96,20 @@ HandleMoveUp(inputValue, type) {
         }
         Do Prompt(previousInputField)
     }
+}
+
+HandleMoveToStart(inputValue, type) {
+    Do SetDefaultValue(inputValue , type)
+
+    Do SetCursor(^EmsCursorPosition("empNumber"))
+    Do Prompt("empNumber")
+    Set nextInputField = $$GetNextInputField(^CurrentInputField)
+    While (nextInputField '= "") {
+        Set nextInputField = $$GetNextInputField(^CurrentInputField)
+        If nextInputField '= "" {
+            Do Prompt(nextInputField)
+        }
+    } 
 }
 
 SetDefaultValue(inputValue, type) {
