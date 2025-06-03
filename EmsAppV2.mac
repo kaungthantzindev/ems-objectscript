@@ -14,13 +14,13 @@ Main
     Quit
 
 Start
-
-   Do Input("empNumber")
-   Do Input("kanjiName")
-   Do Input("kanaName")
-   Do Input("address")
-   Do Input("operationKey", "!")
-   Quit
+    Set ^||IsInputEditMode = ""       
+    Do Input("empNumber")
+    Do Input("kanjiName")
+    Do Input("kanaName")
+    Do Input("address")
+    Do Input("operationKey", "!")
+    Quit
 
 
 #; 
@@ -42,9 +42,11 @@ Input(type, newline = "") {
         Set ^CurrentInputField = type
        
        If inputValue ="" {
-            Do SetDefaultValue(inputValue , type)
-            Write !
-            Quit
+            If ($GET(^||IsInputEditMode) '= "") && (type '= "operationKey") {
+                Do SetDefaultValue(inputValue , type)
+                Write !
+                Quit
+            }
        }
         
         If inputValue = "/" {
@@ -107,6 +109,10 @@ HandleMoveToStart(inputValue, type) {
     While (nextInputField '= "") {
         Set nextInputField = $$GetNextInputField(^CurrentInputField)
         If nextInputField '= "" {
+            If type = "operationKey" {
+                #; clear operation input line
+                Write $CHAR(27)_"[0J"
+            }
             Do Input(nextInputField)
         }
     } 
@@ -140,8 +146,11 @@ Operation(key) {
 
 ShowExistingData(id) {
     If '$DATA(^Employee(id)) {
+        Set ^||IsInputEditMode = ""
         Quit
     }
+
+    Set ^||IsInputEditMode = 1
 
     Set ^EmpDto("empNumber") = $GET(^Employee(id))
 
