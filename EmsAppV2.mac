@@ -113,10 +113,12 @@ HandleMoveToStart(inputValue, type) {
 }
 
 SetDefaultValue(inputValue, type) {
-    Do SetEscape("[D")
+    If (inputValue = "/") || (inputValue = "//") {
+        Do SetEscape("[D")
+    }
     Set defaultValue = $$GetCurrentDefaultValue(type)
     Set inputValue = defaultValue
-    Write defaultValue
+    Write inputValue
     Quit
 }
 
