@@ -15,16 +15,16 @@ Main
 
 Start
 
-   Do Prompt("empNumber")
-   Do Prompt("kanjiName")
-   Do Prompt("kanaName")
-   Do Prompt("address")
-   Do Prompt("operationKey", "!")
+   Do Input("empNumber")
+   Do Input("kanjiName")
+   Do Input("kanaName")
+   Do Input("address")
+   Do Input("operationKey", "!")
    Quit
 
 
 #; 
-Prompt(type, newline = "") {
+Input(type, newline = "") {
     If newline '="" {
         Write @newline
     }
@@ -94,7 +94,7 @@ HandleMoveUp(inputValue, type) {
             #; clear operation input line
             Write $CHAR(27)_"[0J"
         }
-        Do Prompt(previousInputField)
+        Do Input(previousInputField)
     }
 }
 
@@ -102,12 +102,12 @@ HandleMoveToStart(inputValue, type) {
     Do SetDefaultValue(inputValue , type)
 
     Do SetCursor(^EmsCursorPosition("empNumber"))
-    Do Prompt("empNumber")
+    Do Input("empNumber")
     Set nextInputField = $$GetNextInputField(^CurrentInputField)
     While (nextInputField '= "") {
         Set nextInputField = $$GetNextInputField(^CurrentInputField)
         If nextInputField '= "" {
-            Do Prompt(nextInputField)
+            Do Input(nextInputField)
         }
     } 
 }
@@ -155,7 +155,7 @@ ShowExistingData(id) {
     Set ^EmsCursorPosition("address") = $Y
     Set ^EmpDto(id, "address") = $GET(^Employee(id, "address"))
 
-    Do Prompt("operationKey", "!!")
+    Do Input("operationKey", "!!")
 
     Quit
 }
