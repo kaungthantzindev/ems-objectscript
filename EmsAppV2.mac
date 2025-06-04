@@ -9,8 +9,6 @@ Main
     Write "=========================="
     Write !!, "＊＊＊社員登録PG＊＊＊", !!
     Do Start
-
-    Kill ^EmsCursorPosition, ^EmpDto, ^OperationKey
     Quit
 
 Start
@@ -24,7 +22,7 @@ Start
         Quit
     }
     Catch ex {
-        Kill ^EmsCursorPosition, ^EmpDto, ^OperationKey
+        Kill ^EmsCursorPosition, ^EmpDto, ^OperationKey, ^CurrentInputField
         Write ""
     }
 
@@ -102,7 +100,7 @@ HandleMoveUp(inputValue, type) {
         Do SetCursor(^EmsCursorPosition(previousInputField))
         If type = "operationKey" {
             #; clear operation input line
-            Write $CHAR(27)_"[0J"
+            Do SetEscape("[0J")
         }
         Do Input(previousInputField)
     }
@@ -121,7 +119,7 @@ HandleMoveToStart(inputValue, type) {
         If nextInputField '= "" {
             If type = "operationKey" {
                 #; clear operation input line
-                Write $CHAR(27)_"[0J"
+                Do SetEscape("[0J")
             }
             Do Input(nextInputField)
         }
@@ -290,6 +288,7 @@ IsValidEmpNumber(value) {
     }
     Quit 1
 }
+
 IsZenkaku(value) {
     If $MATCH(value, "^[一-龥ぁ-んァ-ヶー　]+$") {
         Quit 1
