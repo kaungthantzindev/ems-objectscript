@@ -14,7 +14,7 @@ Main
     Quit
 
 Start
-    Set ^||IsInputEditMode = ""       
+    Do SetCurrentInputMode("new")
     Do Input("empNumber")
     Do Input("kanjiName")
     Do Input("kanaName")
@@ -42,7 +42,7 @@ Input(type, newline = "") {
         Set ^CurrentInputField = type
        
        If inputValue ="" {
-            If ($GET(^||IsInputEditMode) '= "") && (type '= "operationKey") {
+            If ($$GetCurrentInputMode() = "edit") && (type '= "operationKey") {
                 Do SetDefaultValue(inputValue , type)
                 Write !
                 Quit
@@ -87,6 +87,7 @@ Input(type, newline = "") {
 }
 
 HandleMoveUp(inputValue, type) {
+    Do SetCurrentInputMode("edit")
     Do SetDefaultValue(inputValue, type)
 
     Set previousInputField = $$GetPreviousInputField(type)
@@ -101,6 +102,7 @@ HandleMoveUp(inputValue, type) {
 }
 
 HandleMoveToStart(inputValue, type) {
+    Do SetCurrentInputMode("edit")
     Do SetDefaultValue(inputValue , type)
 
     Do SetCursor(^EmsCursorPosition("empNumber"))
@@ -146,11 +148,11 @@ Operation(key) {
 
 ShowExistingData(id) {
     If '$DATA(^Employee(id)) {
-        Set ^||IsInputEditMode = ""
+        Do SetCurrentInputMode("new")
         Quit
     }
 
-    Set ^||IsInputEditMode = 1
+    Do SetCurrentInputMode("edit")
 
     Set ^EmpDto("empNumber") = $GET(^Employee(id))
 
@@ -212,11 +214,19 @@ SetEscape(key) {
     Quit
 }
 
+GetCurrentInputMode() {
+    Return $GET(^||InputMode)
+}
+
+SetCurrentInputMode(mode = "new") {
+    Set ^||InputMode = mode
+}
+
 GetCurrentGlobalName(type) {
     Return $SELECT(
         type = "empNumber": $NAME(^EmpDto(type)),
         type = "operationKey": $NAME(^OperationKey),
-        1: $NAME(^EmpDto(type))
+        1: $NAME(^EmpDto(^EmpDto("empNumber"), type))
     )
 }
 
