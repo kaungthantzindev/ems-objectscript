@@ -176,9 +176,9 @@ ShowExistingData(id) {
 Create() {
     Set id = $GET(^EmpDto("empNumber"))
     Set ^Employee(id) = $GET(^EmpDto("empNumber"))
-    Set ^Employee(id, "kanjiName") = $GET(^EmpDto("kanjiName"))
-    Set ^Employee(id, "kanaName") = $GET(^EmpDto("kanaName"))
-    Set ^Employee(id, "address") = $GET(^EmpDto("address"))
+    Set ^Employee(id, "kanjiName") = $GET(^EmpDto(id, "kanjiName"))
+    Set ^Employee(id, "kanaName") = $GET(^EmpDto(id, "kanaName"))
+    Set ^Employee(id, "address") = $GET(^EmpDto(id, "address"))
 
     Do ShowMessage("Success")
     Quit
