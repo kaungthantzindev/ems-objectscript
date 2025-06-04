@@ -24,6 +24,7 @@ Start
         Quit
     }
     Catch ex {
+        Kill ^EmsCursorPosition, ^EmpDto, ^OperationKey
         Write ""
     }
 
