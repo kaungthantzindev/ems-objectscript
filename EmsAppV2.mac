@@ -14,13 +14,18 @@ Main
     Quit
 
 Start
-    Do SetCurrentInputMode("new")
-    Do Input("empNumber")
-    Do Input("kanjiName")
-    Do Input("kanaName")
-    Do Input("address")
-    Do Input("operationKey", "!")
-    Quit
+    Try {
+        Do SetCurrentInputMode("new")
+        Do Input("empNumber")
+        Do Input("kanjiName")
+        Do Input("kanaName")
+        Do Input("address")
+        Do Input("operationKey", "!")
+        Quit
+    }
+    Catch ex {
+        Write ""
+    }
 
 
 #; 
@@ -139,7 +144,7 @@ Operation(key) {
     }
 
     If key = "$" {
-        #; exist
+        Throw ##class(%Exception.General).%New("err")
     }
 
     Quit
