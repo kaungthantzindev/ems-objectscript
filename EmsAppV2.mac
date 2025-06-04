@@ -156,21 +156,28 @@ ShowExistingData(id) {
 
     Set ^EmpDto("empNumber") = $GET(^Employee(id))
 
-    Write ?4, "2. 氏名漢字 ＝ ", $GET(^Employee(id, "kanjiName"))
-    Set ^EmsCursorPosition("kanjiName") = $Y
-    Set ^EmpDto(id, "kanjiName") = $GET(^Employee(id, "kanjiName"))
+    Do DisplayData("kanjiName", id)
 
-    Write !, ?4, "3. 氏名カナ ＝ ", $GET(^Employee(id, "kanaName"))
-    Set ^EmsCursorPosition("kanaName") = $Y
-    Set ^EmpDto(id, "kanaName") = $GET(^Employee(id, "kanaName"))
+    Do DisplayData("kanaName", id)
 
-    Write !, ?4, "4. 住　　所 ＝ ", $GET(^Employee(id, "address"))
-    Set ^EmsCursorPosition("address") = $Y
-    Set ^EmpDto(id, "address") = $GET(^Employee(id, "address"))
+    Do DisplayData("address", id)
 
     Do Input("operationKey", "!!")
 
     Quit
+}
+
+DisplayData(type , id) {
+    If type '= "kanjiName" Write !
+    Write ?4, $SELECT(
+        type = "kanjiName": "2. 氏名漢字 ＝ ",
+        type = "kanaName": "3. 氏名カナ ＝ ",
+        type = "address": "4. 住　　所 ＝ ",
+        1: ""
+    ), $GET(^Employee(id, type))
+    Set ^EmsCursorPosition(type) = $Y
+    Set ^EmpDto(id, type) = $GET(^Employee(id, type))
+    Do SetEscape("[K")
 }
 
 Create() {
@@ -333,6 +340,7 @@ ShowMessage(msg, type = "success")
     Write ?10 , msg, !
     Write "###################################"_$CHAR(27)_"[0m"
     Hang 1
+    Kill ^EmpDto, ^EmsCursorPosition, ^OperationKey
     Write #
     Goto Main
     Quit
