@@ -87,6 +87,7 @@ Input(type, newline = "") {
 }
 
 HandleMoveUp(inputValue, type) {
+    Do SetEscape("[D")
     Do SetCurrentInputMode("edit")
     Do SetDefaultValue(inputValue, type)
 
@@ -102,6 +103,7 @@ HandleMoveUp(inputValue, type) {
 }
 
 HandleMoveToStart(inputValue, type) {
+    Do SetEscape("[2D")
     Do SetCurrentInputMode("edit")
     Do SetDefaultValue(inputValue , type)
 
@@ -121,9 +123,6 @@ HandleMoveToStart(inputValue, type) {
 }
 
 SetDefaultValue(inputValue, type) {
-    If (inputValue = "/") || (inputValue = "//") {
-        Do SetEscape("[D")
-    }
     Set defaultValue = $$GetCurrentDefaultValue(type)
     Set inputValue = defaultValue
     Write inputValue
