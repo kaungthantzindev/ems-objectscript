@@ -75,8 +75,7 @@ Input(type, newline = "") {
             Do SetEscape("[K")
         } Else {
             Write !
-            Set tempGlobal = $$GetCurrentGlobalName(type)
-            Set @tempGlobal = inputValue
+            Set @$$GetCurrentGlobalName(type) = inputValue
 
             If type = "empNumber" {
                 Do ShowExistingData(inputValue)
@@ -311,25 +310,13 @@ IsHankaku(value) {
 }
 
 IsValidate(value, type) {
-    If (type = "empNumber") {
-        Return $$IsValidEmpNumber(value)
-    }
-
-    If (type = "kanjiName") {
-        Return $$IsZenkaku(value)
-    }
-
-    If (type = "kanaName") {
-        Return $$IsHankaku(value)
-    }
-
-    If (type = "address") {
-        Return $$IsZenkakuOrAlphabet(value)
-    }
-
-    If (type = "operationKey") {
-        Return $$IsValidOperationKey(value)
-    }
+    Return $SELECT(
+        type = "empNumber": $$IsValidEmpNumber(value),
+        type = "kanjiName": $$IsZenkaku(value),
+        type = "kanaName": $$IsHankaku(value),
+        type = "address": $$IsZenkakuOrAlphabet(value),
+        type = "operationKey": $$IsValidOperationKey(value)
+    )
 }
 
 ShowMessage(msg, type = "success")
