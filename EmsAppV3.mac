@@ -1,0 +1,107 @@
+ROUTINE EmsAppV3
+#Define CursorPosition "^||CursorPosition($$GetInputText(key))"
+#Define ClearLeft D SetEscape("[1K")
+#Define ClearRight D SetEscape("[0K")
+
+1; 社員番号
+2; 氏名漢字
+3; 氏名カナ
+4; 住　　所
+5; <@:登録 -:削除 /:↑ //:番号 $:終了 行>
+Main
+    W #
+    W "=========================="
+    W !!, "＊＊＊社員登録PG＊＊＊", !!
+    Try {
+        F i = 1:1:5 {
+        D Input(i)
+    }
+    }
+    Catch e {
+        W e.OnAsStatus()
+        Q
+    }
+    Q
+
+Input(key) {
+    While 1 {
+        W ?4, key_". "_$$GetInputText(key)_" = "
+        R inputValue
+        S @$$$CursorPosition = $Y
+
+        I '$$IsValidate(inputValue, key) {
+            W ?4, "something went wrong"
+            D SetCursor($GET(@$$$CursorPosition))
+            Hang 1
+            $$$ClearRight
+        } Else {
+            W !
+            #; Set @$$GetInputText(key) = inputValue
+            #; W $$GetInputText(key)
+            Q
+        }
+    }
+
+    Q
+}
+
+GetInputText(key) public {
+    Q $PIECE($TEXT(@key), "; ", 2)
+}
+
+SetEscape(key) {
+    W $CHAR(27)_key
+}
+
+SetCursor(row)
+    S row = row + 1
+    W $CHAR(27)_"["_row_";"_5_"H"
+    S $Y = row - 1
+    #; Write $CHAR(27)_"[0J"
+    Q
+
+IsValidate(value, key) {
+    Q $CASE(key,
+        1: $$IsValidEmpNumber(value),
+        2: $$IsZenkaku(value),
+        3: $$IsHankaku(value),
+        4: $$IsZenkakuOrAlphabet(value),
+        5: $$IsValidOperationKey(value)
+    )
+}
+
+IsValidOperationKey(value) {
+    I (value = "@") || (value = "/") || (value = "//") || (value = "DEL") || (value = "$") {
+        Q 1
+    }
+
+    Q 0
+}
+
+IsValidEmpNumber(value) {
+    I (value'?1n.N) || (value < 0) || (value > 9999) {
+        Q 0
+    }
+    Q 1
+}
+
+IsZenkaku(value) {
+    I $MATCH(value, "^[一-龥ぁ-んァ-ヶー　]+$") {
+        Q 1
+    }
+    Q 0
+}
+
+IsZenkakuOrAlphabet(value) {
+    I $MATCH(value, "^[一-龥ぁ-んァ-ヶー　]+$") || $MATCH(value, "^[A-Za-z]+$") {
+        Q 1
+    }
+    Q 0
+}
+
+IsHankaku(value) {
+    I $MATCH(value, "^[ｦ-ﾟ ｡-ﾟ]+$") {
+        Q 1
+    }
+    Q 0
+}
