@@ -18,7 +18,7 @@ Start
         Do Input("kanjiName")
         Do Input("kanaName")
         Do Input("address")
-        Do Input("operationKey", "!")
+        Do Input("operationKey")
         Quit
     }
     Catch ex {
@@ -28,10 +28,7 @@ Start
 
 
 #; 
-Input(type, newline = "") {
-    If newline '="" {
-        Write @newline
-    }
+Input(type) {
     While (1) {
         Write ?4, $SELECT(
             type = "empNumber" : "1. 社員番号 ＝ ",
@@ -164,7 +161,8 @@ ShowExistingData(id) {
 
     Do DisplayData("address", id)
 
-    Do Input("operationKey", "!!")
+    Write !
+    Do Input("operationKey")
 
     Quit
 }
