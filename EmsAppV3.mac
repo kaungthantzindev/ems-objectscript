@@ -1,5 +1,5 @@
 ROUTINE EmsAppV3
-#Define CursorPosition "^||CursorPosition($$GetInputText(key))"
+#Define CursorPosition "^||CursorPosition($$GetLabelText(key))"
 #Define ClearLeft D SetEscape("[1K")
 #Define ClearRight D SetEscape("[0K")
 
@@ -25,19 +25,18 @@ Main
 
 Input(key) {
     While 1 {
-        W ?4, key_". "_$$GetInputText(key)_" = "
+        W ?4, key_". "_$$GetLabelText(key)_" = "
         R inputValue
         S @$$$CursorPosition = $Y
 
         I '$$IsValidate(inputValue, key) {
-            W ?4, "something went wrong"
+            W $JUSTIFY("something went wrong", 25)
             D SetCursor($GET(@$$$CursorPosition))
-            Hang 1
+            H 1
             $$$ClearRight
         } Else {
             W !
-            #; Set @$$GetInputText(key) = inputValue
-            #; W $$GetInputText(key)
+            S @$$GetCurrentGlobalName(key) = inputValue
             Q
         }
     }
@@ -45,7 +44,15 @@ Input(key) {
     Q
 }
 
-GetInputText(key) public {
+GetCurrentGlobalName(key) {
+    Ret $CASE(key,
+        1: $NAME(^||EmpDto($$GetLabelText(key))),
+        5: $NAME(^||OperationKey),
+        : $NAME(^||EmpDto(^||EmpDto($$GetLabelText(1)), $$GetLabelText(key)))
+    )
+}
+
+GetLabelText(key) public {
     Q $PIECE($TEXT(@key), "; ", 2)
 }
 
@@ -59,6 +66,14 @@ SetCursor(row)
     S $Y = row - 1
     #; Write $CHAR(27)_"[0J"
     Q
+
+Create() {
+    S ID = $GET(^||EmpDto($$GetLabelText(1)))
+    S ^Employee(ID, $$GetLabelText(2)) = $GET(^||EmpDto(ID, $$GetLabelText(2)))
+    S ^Employee(ID, $$GetLabelText(3)) = $GET(^||EmpDto(ID, $$GetLabelText(3)))
+    S ^Employee(ID, $$GetLabelText(4)) = $GET(^||EmpDto(ID, $$GetLabelText(4)))
+    Q
+}
 
 IsValidate(value, key) {
     Q $CASE(key,

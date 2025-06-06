@@ -267,7 +267,7 @@ GetNextInputField(current) {
 }
 
 ShowValidationErrorMessage(msg) {
-    Write ?34, $CHAR(27)_"[1m"_$CHAR(27)_"[31m"_msg_$CHAR(27)_"[0m"
+    Write $JUSTIFY($CHAR(27)_"[1m"_$CHAR(27)_"[31m"_msg_$CHAR(27)_"[0m", 34)
     Quit
 }
 
