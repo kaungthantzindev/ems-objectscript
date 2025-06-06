@@ -2,6 +2,11 @@ ROUTINE EmsAppV3
 #Define CursorPosition "^||CursorPosition($$GetLabelText(key))"
 #Define ClearLeft D SetEscape("[1K")
 #Define ClearRight D SetEscape("[0K")
+#Define ClearDown D SetEscape("[0J")
+#Define EmpDtoID "^||EmpDto($$GetLabelText(1))"
+#Define RED $CHAR(27)_"[1m"_$CHAR(27)_"[31m" ##; red bold text color
+#Define GREEN $CHAR(27)_"[1m"_$CHAR(27)_"[32m" ##; green bold text color
+#Define BLACK $CHAR(27)_"[0m"
 
 1; 社員番号
 2; 氏名漢字
@@ -15,7 +20,7 @@ Main
     Try {
         F i = 1:1:5 {
         D Input(i)
-    }
+        }
     }
     Catch e {
         W e.OnAsStatus()
@@ -26,25 +31,41 @@ Main
 Input(key) {
     While 1 {
         W ?4, key_". "_$$GetLabelText(key)_" = "
+        D SetEscape("[K")
         R inputValue
         S @$$$CursorPosition = $Y
+        S ^||CurrentInputField = key 
+
+        I inputValue ="" {
+            I ($$GetCurrentInputMode() = "edit") && (key '= 5) {
+                D SetDefaultValue(inputValue , key)
+                W !
+                Q
+            }
+       }
+
+        I inputValue = "/" D MoveUp(inputValue, key) Continue
+
+        I inputValue = "//"  D MoveToStart(inputValue , key)
+        
 
         I '$$IsValidate(inputValue, key) {
-            W $JUSTIFY("something went wrong", 25)
+            W $JUSTIFY($$ValidationErrorMessage(key), 40)
             D SetCursor($GET(@$$$CursorPosition))
             H 1
             $$$ClearRight
         } Else {
             W !
             S @$$GetCurrentGlobalName(key) = inputValue
+            I key = 1 D ShowExistingData(inputValue)
+            I key = 5 D Operation(inputValue)
             Q
         }
     }
-
     Q
 }
 
-GetCurrentGlobalName(key) {
+GetCurrentGlobalName(key) public {
     Ret $CASE(key,
         1: $NAME(^||EmpDto($$GetLabelText(key))),
         5: $NAME(^||OperationKey),
@@ -67,11 +88,108 @@ SetCursor(row)
     #; Write $CHAR(27)_"[0J"
     Q
 
+MoveUp(inputValue, key) {
+    D SetEscape("[D")
+    D SetCurrentInputMode("edit")
+    D SetDefaultValue(inputValue, key)
+    S previousInputField = $$GetPreviousInputField(key)
+    I previousInputField '= 0 {
+        D SetCursor($GET(^||CursorPosition($$GetLabelText(previousInputField))))
+        I key = 5 $$$ClearDown ##; clear operation input 
+        D Input(previousInputField)
+    }
+}
+
+MoveToStart(inputValue, type) {
+    D SetEscape("[2D")
+    D SetCurrentInputMode("edit")
+    D SetDefaultValue(inputValue , type)
+
+    D SetCursor(^||CursorPosition($$GetLabelText(1)))
+    D Input(1)
+    S nextInputField = $$GetNextInputField(^||CurrentInputField)
+    While (nextInputField '= "") {
+        S nextInputField = $$GetNextInputField(^||CurrentInputField)
+        I nextInputField '= "" {
+            I type = 5 $$$ClearDown
+            D Input(nextInputField)
+        }
+    } 
+}
+
+GetPreviousInputField(key) {
+    Q $CASE(key, 1: 0, :key - 1)
+}
+
+GetNextInputField(key) {
+    Q $CASE(key, 5: 0, : key + 1)
+}
+
+GetCurrentInputMode() {
+    Ret $GET(^||InputMode)
+}
+
+SetCurrentInputMode(mode = "new") {
+    S ^||InputMode = mode
+}
+
+GetCurrentDefaultValue(key) {
+    Ret $SELECT(
+        key = 1: $GET(@$$$EmpDtoID),
+        1: $GET(^||EmpDto(@$$$EmpDtoID, $$GetLabelText(key)))
+    )
+}
+
+SetDefaultValue(inputValue, type) {
+    S defaultValue = $$GetCurrentDefaultValue(type)
+    S inputValue = defaultValue
+    W inputValue
+    Q
+}
+
+ShowExistingData(id)  {
+    I '$DATA(^Employee(id)) {
+        D SetCurrentInputMode("new")
+        Q
+    }
+    D SetCurrentInputMode("edit")
+    S ^||EmpDto($$GetLabelText(1)) = $GET(^Employee(id))
+    D DisplayData(2, id)
+    D DisplayData(3, id)
+    D DisplayData(4, id)
+    W !
+    D Input(5)
+    Q
+}
+
+DisplayData(key , id) {
+    I key '= 2 W !
+    W ?4, key_". "_$$GetLabelText(key)_" = ", $GET(^Employee(id, $$GetLabelText(key)))
+    S @$$$CursorPosition = $Y
+    S ^||EmpDto(id, $$GetLabelText(key)) = $GET(^Employee(id, $$GetLabelText(key)))
+    D SetEscape("[K")
+}
+
 Create() {
     S ID = $GET(^||EmpDto($$GetLabelText(1)))
     S ^Employee(ID, $$GetLabelText(2)) = $GET(^||EmpDto(ID, $$GetLabelText(2)))
     S ^Employee(ID, $$GetLabelText(3)) = $GET(^||EmpDto(ID, $$GetLabelText(3)))
     S ^Employee(ID, $$GetLabelText(4)) = $GET(^||EmpDto(ID, $$GetLabelText(4)))
+    D ShowMessage("success")
+    Q
+}
+
+Delete() {
+    S ID = $GET(^||EmpDto($$GetLabelText(1)))
+    I '$DATA(^Employee(ID)) D ShowMessage("Unregistered data!", "error") Q
+    K ^Employee(ID)
+    Q
+}
+
+Operation(inputValue) {
+    I inputValue = "@" D Create
+    I inputValue = "DEL" D Delete
+    I inputValue = "$" Q ""
     Q
 }
 
@@ -86,37 +204,47 @@ IsValidate(value, key) {
 }
 
 IsValidOperationKey(value) {
-    I (value = "@") || (value = "/") || (value = "//") || (value = "DEL") || (value = "$") {
-        Q 1
-    }
-
+    I (value = "@") || (value = "/") || (value = "//") || (value = "DEL") || (value = "$") { Q 1 }
     Q 0
 }
 
 IsValidEmpNumber(value) {
-    I (value'?1n.N) || (value < 0) || (value > 9999) {
-        Q 0
-    }
+    I (value'?1n.N) || (value < 0) || (value > 9999) { Q 0 }
     Q 1
 }
 
 IsZenkaku(value) {
-    I $MATCH(value, "^[一-龥ぁ-んァ-ヶー　]+$") {
-        Q 1
-    }
+    I $MATCH(value, "^[一-龥ぁ-んァ-ヶー　]+$") { Q 1 }
     Q 0
 }
 
 IsZenkakuOrAlphabet(value) {
-    I $MATCH(value, "^[一-龥ぁ-んァ-ヶー　]+$") || $MATCH(value, "^[A-Za-z]+$") {
-        Q 1
-    }
+    I $MATCH(value, "^[一-龥ぁ-んァ-ヶー　]+$") || $MATCH(value, "^[A-Za-z]+$") { Q 1 }
     Q 0
 }
 
 IsHankaku(value) {
-    I $MATCH(value, "^[ｦ-ﾟ ｡-ﾟ]+$") {
-        Q 1
-    }
+    I $MATCH(value, "^[ｦ-ﾟ ｡-ﾟ]+$") { Q 1 }
     Q 0
+}
+
+ValidationErrorMessage(key) {
+    Ret $$$RED_$CASE(key,
+        1:"Invalid EmployeeNumber",
+        2:"Invalid Kanji Name",
+        3:"Invalid Kana Name",
+        4:"Invalid address"
+    )_$$$BLACK
+}
+
+ShowMessage(msg, type = "success") {
+    S color = $SELECT(type = "error": $$$RED, 1: $$$GREEN)
+    W #
+    W color_"###################################", !
+    W ?10 , msg, !
+    W "###################################"_$$$BLACK
+    H 1
+    W #
+    G Main^EmsAppV3
+    Q
 }
