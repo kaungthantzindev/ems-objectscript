@@ -1,5 +1,5 @@
 ROUTINE EmsAppV3
-#Include V3Macros
+#Include V3Macros ##; Data format -> Employee(1111) = "1111/春/ｶｳﾝ/address", ^||EmpDto is Employee Data Transfer Object to store temporary values.
 1; 社員番号
 2; 氏名漢字
 3; 氏名カナ
@@ -138,15 +138,13 @@ SetDefaultValue(inputValue, type) {
 }
 
 ShowExistingData(id)  {
-    I '$DATA(^Employee(id)) {
-        D SetCurrentInputMode("new")
-        Q
-    }
+    I '$DATA(^Employee(id)) { D SetCurrentInputMode("new") Q }
     D SetCurrentInputMode("edit")
-    S ^||EmpDto($$GetLabelText(1)) = $GET(^Employee(id))
-    D DisplayData(2, id)
-    D DisplayData(3, id)
-    D DisplayData(4, id)
+    S @$$$EmpDtoID = $PIECE($GET(^Employee(id)), "/", 1)
+    F i=2:1:4 {
+        S ^||EmpDto(id, $$GetLabelText(i)) = $PIECE($GET(^Employee(id)), "^", i)
+        D DisplayData(i, id)
+    }
     W !
     D Input(5)
     Q
@@ -154,24 +152,25 @@ ShowExistingData(id)  {
 
 DisplayData(key , id) {
     I key '= 2 W !
-    W ?4, key_". "_$$GetLabelText(key)_" = ", $GET(^Employee(id, $$GetLabelText(key)))
+    W ?4, key_". "_$$GetLabelText(key)_" = "_$PIECE($GET(^Employee(id)), "/", key)
     S @$$$CursorPosition = $Y
-    S ^||EmpDto(id, $$GetLabelText(key)) = $GET(^Employee(id, $$GetLabelText(key)))
+    S ^||EmpDto(id, $$GetLabelText(key)) = $PIECE($GET(^Employee(id)), "/", key)
     D SetEscape("[K")
 }
 
 Create() {
-    S ID = $GET(^||EmpDto($$GetLabelText(1)))
-    S ^Employee(ID) = ID
-    S ^Employee(ID, $$GetLabelText(2)) = $GET(^||EmpDto(ID, $$GetLabelText(2)))
-    S ^Employee(ID, $$GetLabelText(3)) = $GET(^||EmpDto(ID, $$GetLabelText(3)))
-    S ^Employee(ID, $$GetLabelText(4)) = $GET(^||EmpDto(ID, $$GetLabelText(4)))
+    S ID = $GET(@$$$EmpDtoID)
+    S record = ID
+    F i = 2:1:4 {
+        S record = record_"/"_$GET(^||EmpDto(ID, $$GetLabelText(i)))
+    }
+    S ^Employee(ID) = record
     D ShowMessage("success")
     Q
 }
 
 Delete() {
-    S ID = $GET(^||EmpDto($$GetLabelText(1)))
+    S ID = $GET(@$$$EmpDtoID)
     I '$DATA(^Employee(ID)) D ShowMessage("Unregistered data!", "error") Q
     K ^Employee(ID)
     D ShowMessage("success")
