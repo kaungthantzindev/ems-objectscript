@@ -6,6 +6,7 @@ ROUTINE EmsAppV3
 4; 住　　所
 5; <@:登録 -:削除 /:↑ //:番号 $:終了 行>
 Main
+    K ^||EmpDto, ^||CurrentInputField, ^||CursorPosition, ^||InputMode 
     W #
     W "=========================="
     W !!, "＊＊＊社員登録PG＊＊＊", !!
@@ -24,7 +25,7 @@ Main
 Input(key) {
     While 1 {
         W ?4, key_". "_$$GetLabelText(key)_" = "
-        D SetEscape("[K")
+        $$$ClearRight
         R inputValue
         S @$$$CursorPosition = $Y
         S ^||CurrentInputField = key 
@@ -235,7 +236,7 @@ ShowMessage(msg, type = "success") {
     W ?10 , msg, !
     W "###################################"_$$$BLACK
     H 1
-    K ^||EmpDto
+    K ^||EmpDto, ^||CurrentInputField, ^||CursorPosition, ^||InputMode
     W #
     G Main^EmsAppV3
     Q
