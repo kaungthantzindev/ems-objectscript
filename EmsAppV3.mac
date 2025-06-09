@@ -6,18 +6,17 @@ ROUTINE EmsAppV3
 4; 住　　所
 5; <@:登録 -:削除 /:↑ //:番号 $:終了 行>
 Main
-    K ^||EmpDto, ^||CurrentInputField, ^||CursorPosition, ^||InputMode 
     W #
     W "=========================="
     W !!, "＊＊＊社員登録PG＊＊＊", !!
     Try {
         F i = 1:1:5 {
-        D Input(i)
+            D Input(i)
+            Q:^||IsQuit=1
         }
     }
     Catch e {
-        I e.Name = "quit" { W "Bye!" Q }
-        W e.OnAsStatus()
+        D e.Log()
         Q
     }
     Q
@@ -239,6 +238,6 @@ ShowMessage(msg, type = "success") {
     H 1
     K ^||EmpDto, ^||CurrentInputField, ^||CursorPosition, ^||InputMode
     W #
-    G Main^EmsAppV3
+    D Main
     Q
 }
