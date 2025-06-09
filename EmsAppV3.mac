@@ -1,13 +1,5 @@
 ROUTINE EmsAppV3
-#Define CursorPosition "^||CursorPosition($$GetLabelText(key))"
-#Define ClearLeft D SetEscape("[1K")
-#Define ClearRight D SetEscape("[0K")
-#Define ClearDown D SetEscape("[0J")
-#Define EmpDtoID "^||EmpDto($$GetLabelText(1))"
-#Define RED $CHAR(27)_"[1m"_$CHAR(27)_"[31m" ##; red bold text color
-#Define GREEN $CHAR(27)_"[1m"_$CHAR(27)_"[32m" ##; green bold text color
-#Define BLACK $CHAR(27)_"[0m"
-
+#Include V3Macros
 1; 社員番号
 2; 氏名漢字
 3; 氏名カナ
@@ -23,6 +15,7 @@ Main
         }
     }
     Catch e {
+        I e.Name = "quit" { W "Bye!" Q }
         W e.OnAsStatus()
         Q
     }
@@ -191,7 +184,7 @@ Delete() {
 Operation(inputValue) {
     I inputValue = "@" D Create
     I inputValue = "DEL" D Delete
-    I inputValue = "$" Q ""
+    I inputValue = "$" Throw ##class(%Exception.General).%New("quit")
     Q
 }
 
@@ -246,7 +239,7 @@ ShowMessage(msg, type = "success") {
     W ?10 , msg, !
     W "###################################"_$$$BLACK
     H 1
-    kill ^||EmpDto
+    K ^||EmpDto
     W #
     G Main^EmsAppV3
     Q
