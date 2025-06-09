@@ -184,6 +184,7 @@ Delete() {
     S ID = $GET(^||EmpDto($$GetLabelText(1)))
     I '$DATA(^Employee(ID)) D ShowMessage("Unregistered data!", "error") Q
     K ^Employee(ID)
+    D ShowMessage("success")
     Q
 }
 
@@ -245,6 +246,7 @@ ShowMessage(msg, type = "success") {
     W ?10 , msg, !
     W "###################################"_$$$BLACK
     H 1
+    kill ^||EmpDto
     W #
     G Main^EmsAppV3
     Q
