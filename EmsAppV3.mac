@@ -41,7 +41,6 @@ Input(key) {
 
         I inputValue = "//"  D MoveToStart(inputValue , key)
         
-
         I '$$IsValidate(inputValue, key) {
             W $JUSTIFY($$ValidationErrorMessage(key), 40)
             D SetCursor($GET(@$$$CursorPosition))
@@ -78,7 +77,6 @@ SetCursor(row)
     S row = row + 1
     W $CHAR(27)_"["_row_";"_5_"H"
     S $Y = row - 1
-    #; Write $CHAR(27)_"[0J"
     Q
 
 MoveUp(inputValue, key) {
@@ -97,7 +95,6 @@ MoveToStart(inputValue, type) {
     D SetEscape("[2D")
     D SetCurrentInputMode("edit")
     D SetDefaultValue(inputValue , type)
-
     D SetCursor(^||CursorPosition($$GetLabelText(1)))
     D Input(1)
     S nextInputField = $$GetNextInputField(^||CurrentInputField)
