@@ -225,7 +225,8 @@ ValidationErrorMessage(key) {
         1:"Invalid EmployeeNumber",
         2:"Invalid Kanji Name",
         3:"Invalid Kana Name",
-        4:"Invalid address"
+        4:"Invalid address",
+        5:"Invalid Operation key"
     )_$$$BLACK
 }
 
