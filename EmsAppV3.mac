@@ -172,6 +172,7 @@ DisplayData(key , id) {
 
 Create() {
     S ID = $GET(^||EmpDto($$GetLabelText(1)))
+    S ^Employee(ID) = ID
     S ^Employee(ID, $$GetLabelText(2)) = $GET(^||EmpDto(ID, $$GetLabelText(2)))
     S ^Employee(ID, $$GetLabelText(3)) = $GET(^||EmpDto(ID, $$GetLabelText(3)))
     S ^Employee(ID, $$GetLabelText(4)) = $GET(^||EmpDto(ID, $$GetLabelText(4)))
