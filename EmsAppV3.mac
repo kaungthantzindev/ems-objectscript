@@ -12,7 +12,7 @@ Main
     W !!, "＊＊＊社員登録PG＊＊＊", !!
     Try {
         F i = 1:1:5 {
-            I $GET(^||ShouldQuit) Q
+            Q:$GET(^||ShouldQuit)
             D Input(i)
         }
     }
@@ -23,8 +23,8 @@ Main
     Q
 
 Input(key) {
-    I $GET(^||ShouldQuit) Q
     While 1 {
+        Q:$GET(^||ShouldQuit)
         W ?4, key_". "_$$GetLabelText(key)_" = "
         $$$ClearRight
         R inputValue
@@ -69,6 +69,46 @@ GetCurrentGlobalName(key) public {
 
 GetLabelText(key) public {
     Q $PIECE($TEXT(@key), "; ", 2)
+}
+
+ShowExistingData(id)  {
+    I '$DATA(^Employee(id)) { D SetCurrentInputMode("new") Q }
+    D SetCurrentInputMode("edit")
+    S @$$$EmpDtoID = $PIECE($GET(^Employee(id)), "/", 1)
+    F i=2:1:4 {
+        S ^||EmpDto(id, $$GetLabelText(i)) = $PIECE($GET(^Employee(id)), "^", i)
+        D DisplayData(i, id)
+    }
+    W !
+    D Input(5)
+    Q
+}
+
+DisplayData(key , id) {
+    I key '= 2 W !
+    W ?4, key_". "_$$GetLabelText(key)_" = "_$PIECE($GET(^Employee(id)), "/", key)
+    S @$$$CursorPosition = $Y
+    S ^||EmpDto(id, $$GetLabelText(key)) = $PIECE($GET(^Employee(id)), "/", key)
+    D SetEscape("[K")
+}
+
+Create() {
+    S ID = $GET(@$$$EmpDtoID)
+    S record = ID
+    F i = 2:1:4 {
+        S record = record_"/"_$GET(^||EmpDto(ID, $$GetLabelText(i)))
+    }
+    S ^Employee(ID) = record
+    D ShowMessage("success")
+    Q
+}
+
+Delete() {
+    S ID = $GET(@$$$EmpDtoID)
+    I '$DATA(^Employee(ID)) D ShowMessage("Unregistered data!", "error") Q
+    K ^Employee(ID)
+    D ShowMessage("success")
+    Q
 }
 
 SetEscape(key) {
@@ -136,46 +176,6 @@ SetDefaultValue(inputValue, type) {
     S defaultValue = $$GetCurrentDefaultValue(type)
     S inputValue = defaultValue
     W inputValue
-    Q
-}
-
-ShowExistingData(id)  {
-    I '$DATA(^Employee(id)) { D SetCurrentInputMode("new") Q }
-    D SetCurrentInputMode("edit")
-    S @$$$EmpDtoID = $PIECE($GET(^Employee(id)), "/", 1)
-    F i=2:1:4 {
-        S ^||EmpDto(id, $$GetLabelText(i)) = $PIECE($GET(^Employee(id)), "^", i)
-        D DisplayData(i, id)
-    }
-    W !
-    D Input(5)
-    Q
-}
-
-DisplayData(key , id) {
-    I key '= 2 W !
-    W ?4, key_". "_$$GetLabelText(key)_" = "_$PIECE($GET(^Employee(id)), "/", key)
-    S @$$$CursorPosition = $Y
-    S ^||EmpDto(id, $$GetLabelText(key)) = $PIECE($GET(^Employee(id)), "/", key)
-    D SetEscape("[K")
-}
-
-Create() {
-    S ID = $GET(@$$$EmpDtoID)
-    S record = ID
-    F i = 2:1:4 {
-        S record = record_"/"_$GET(^||EmpDto(ID, $$GetLabelText(i)))
-    }
-    S ^Employee(ID) = record
-    D ShowMessage("success")
-    Q
-}
-
-Delete() {
-    S ID = $GET(@$$$EmpDtoID)
-    I '$DATA(^Employee(ID)) D ShowMessage("Unregistered data!", "error") Q
-    K ^Employee(ID)
-    D ShowMessage("success")
     Q
 }
 
