@@ -6,11 +6,13 @@ ROUTINE EmsAppV3
 4; 住　　所
 5; <@:登録 -:削除 /:↑ //:番号 $:終了 行>
 Main
+    D CleanUp
     W #
     W "=========================="
     W !!, "＊＊＊社員登録PG＊＊＊", !!
     Try {
         F i = 1:1:5 {
+            I $GET(^||ShouldQuit) Q
             D Input(i)
         }
     }
@@ -21,6 +23,7 @@ Main
     Q
 
 Input(key) {
+    I $GET(^||ShouldQuit) Q
     While 1 {
         W ?4, key_". "_$$GetLabelText(key)_" = "
         $$$ClearRight
@@ -179,7 +182,7 @@ Delete() {
 Operation(inputValue) {
     I inputValue = "@" D Create
     I inputValue = "DEL" D Delete
-    I inputValue = "$" Throw ##class(%Exception.General).%New("quit")
+    I inputValue = "$" S ^||ShouldQuit = 1 Q
     Q
 }
 
@@ -235,8 +238,10 @@ ShowMessage(msg, type = "success") {
     W ?10 , msg, !
     W "###################################"_$$$BLACK
     H 1
-    K ^||EmpDto, ^||CurrentInputField, ^||CursorPosition, ^||InputMode
     W #
     D Main
     Q
 }
+
+CleanUp
+    K ^||EmpDto, ^||CurrentInputField, ^||CursorPosition, ^||InputMode, ^||ShouldQuit
