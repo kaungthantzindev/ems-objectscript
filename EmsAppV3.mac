@@ -12,7 +12,7 @@ Main
     W !!, "＊＊＊社員登録PG＊＊＊", !!
     Try {
         F i = 1:1:5 {
-            Q:$GET(^||ShouldQuit)
+            Q:$GET(^||ShouldQuit)=1
             D Input(i)
         }
     }
@@ -24,7 +24,6 @@ Main
 
 Input(key) {
     While 1 {
-        Q:$GET(^||ShouldQuit)
         W ?4, key_". "_$$GetLabelText(key)_" = "
         $$$ClearRight
         R inputValue
@@ -37,7 +36,7 @@ Input(key) {
                 W !
                 Q
             }
-       }
+        }
 
         I inputValue = "/" D MoveUp(inputValue, key) Continue
 
@@ -140,9 +139,9 @@ MoveToStart(inputValue, type) {
     D SetCursor(^||CursorPosition($$GetLabelText(1)))
     D Input(1)
     S nextInputField = $$GetNextInputField(^||CurrentInputField)
-    While (nextInputField '= "") {
+    While (nextInputField '= 0) {
         S nextInputField = $$GetNextInputField(^||CurrentInputField)
-        I nextInputField '= "" {
+        I nextInputField '= 0 {
             I type = 5 $$$ClearDown
             D Input(nextInputField)
         }
