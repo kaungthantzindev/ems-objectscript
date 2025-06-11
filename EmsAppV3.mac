@@ -13,7 +13,7 @@ Main
     Try {
         For i = 1:1:5 {
             Quit:$GET(^||ShouldQuit)=1
-            Do Input(i)
+            Do Prompt(i)
         }
     }
     Catch e {
@@ -22,13 +22,9 @@ Main
     }
     Quit
 
-Input(key) {
+Prompt(key) {
     While 1 {
-        Write ?4, key_". "_$$GetLabelText(key)_" = "
-        $$$ClearRight
-        Read inputValue
-        Set @$$$CursorPosition = $Y
-        Set ^||CurrentInputField = key 
+        Set inputValue = $$GetInputValue(key)
 
         If inputValue ="" {
             If ($$GetCurrentInputMode() = "edit") && (key '= 5) {
@@ -39,35 +35,51 @@ Input(key) {
         }
 
         If inputValue = "/" Do MoveUp(inputValue, key) Continue
-
         If inputValue = "//"  Do MoveToStart(inputValue , key)
         
         If '$$IsValidate(inputValue, key) {
-            Write $JUSTIFY($$ValidationErrorMessage(key), 40)
-            Do SetCursor($GET(@$$$CursorPosition))
-            Hang 1
-            $$$ClearRight
+            Do ShowValidationError(key)
         } Else {
-            Write !
-            Set @$$GetCurrentGlobalName(key) = inputValue
-            If key = 1 Do ShowExistingData(inputValue)
-            If key = 5 Do Operation(inputValue)
+            Do SaveInputValue(inputValue, key)
             Quit
         }
     }
     Quit
 }
 
-GetCurrentGlobalName(key) public {
-    Return $CASE(key,
-        1: $NAME(^||EmpDto($$GetLabelText(key))),
-        5: $NAME(^||OperationKey),
-        : $NAME(^||EmpDto(^||EmpDto($$GetLabelText(1)), $$GetLabelText(key)))
-    )
+GetInputValue(key) {
+    Write ?4, key_". "_$$GetLabelText(key)_" = "
+    $$$ClearRight
+    Read inputValue
+    Set @$$$CursorPosition = $Y
+    Set ^||CurrentInputField = key
+    Return inputValue 
 }
 
 GetLabelText(key) public {
     Quit $PIECE($TEXT(@key), "; ", 2)
+}
+
+ShowValidationError(key) {
+    Write $JUSTIFY($$ValidationErrorMessage(key), 40)
+    Do SetCursor($GET(@$$$CursorPosition))
+    Hang 1
+    $$$ClearRight
+}
+
+SaveInputValue(inputValue, key) {
+    Write !
+    Set @$$GetCurrentGlobalName(key) = inputValue
+    If key = 1 Do ShowExistingData(inputValue)
+    If key = 5 Do Operation(inputValue)
+}
+
+GetCurrentGlobalName(key) public {
+    Return $CASE(key,
+        1: $NAME(^||EmpDto($$GetLabelText(key))),
+        5: $NAME(^||OperationKey),
+        : $NAME(^||EmpDto(@$$$EmpDtoID, $$GetLabelText(key)))
+    )
 }
 
 ShowExistingData(id)  {
@@ -79,7 +91,7 @@ ShowExistingData(id)  {
         Do DisplayData(i, id)
     }
     Write !
-    Do Input(5)
+    Do Prompt(5)
     Quit
 }
 
@@ -128,7 +140,7 @@ MoveUp(inputValue, key) {
     If previousInputField '= 0 {
         Do SetCursor($GET(^||CursorPosition($$GetLabelText(previousInputField))))
         If key = 5 $$$ClearDown ##; clear operation input 
-        Do Input(previousInputField)
+        Do Prompt(previousInputField)
     }
 }
 
@@ -137,13 +149,13 @@ MoveToStart(inputValue, type) {
     Do SetCurrentInputMode("edit")
     Do SetDefaultValue(inputValue , type)
     Do SetCursor(^||CursorPosition($$GetLabelText(1)))
-    Do Input(1)
+    Do Prompt(1)
     Set nextInputField = $$GetNextInputField(^||CurrentInputField)
     While (nextInputField '= 0) {
         Set nextInputField = $$GetNextInputField(^||CurrentInputField)
         If nextInputField '= 0 {
             If type = 5 $$$ClearDown
-            Do Input(nextInputField)
+            Do Prompt(nextInputField)
         }
     } 
 }
